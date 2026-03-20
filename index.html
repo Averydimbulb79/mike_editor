@@ -4,8 +4,8 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
-<title>Mike Markdown Editor (MME) v5 v5</title>
-<meta content="Mike Editor v5 — Multi-ribbon Markdown Editor with Mermaid support" name="generator"/>
+<title>Mike Markdown Editor (MME) — Document-first Markdown Editor with Mermaid Support</title>
+<meta content="Mike Markdown Editor (MME) — Document-first Markdown Editor with Mermaid Support" name="generator"/>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.5/dist/purify.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
@@ -157,15 +157,15 @@
       #printPage { display:block !important; width:100% !important; max-width:none !important; margin:0 auto !important; padding:8mm 10mm 10mm 10mm !important; background:white !important; color:black !important; }
     }
   </style>
-</head>
+<meta content="A document-first Markdown editor designed for clean writing, structured layout, and reliable export. Includes Mermaid diagram support." name="description"/></head>
 <body data-theme="light">
 <div class="app">
 <header class="topbar">
 <div class="topbar-left">
 <div class="app-badge">M</div>
 <div class="brand">
-<div class="brand-title">Mike Markdown Editor (MME) v5</div>
-<div class="brand-subtitle">Multi-ribbon Markdown Editor with Mermaid support</div>
+<div class="brand-title">Mike Markdown Editor (MME) v6</div>
+<div class="brand-subtitle">Document-first Markdown Editor with Mermaid Support</div>
 </div>
 </div>
 <div class="topbar-right">
@@ -244,6 +244,8 @@
 <button class="tool-btn large" id="themeRibbonBtn" type="button"><span class="icon">☾</span><span>Dark Mode</span></button>
 <button class="tool-btn large" id="fullscreenRibbonBtn" type="button"><span class="icon">⛶</span><span>Fullscreen</span></button>
 <button class="tool-btn large" id="outlineToggleBtn" type="button"><span class="icon">≡</span><span>Outline On</span></button>
+<button class="tool-btn large" id="editorToggleBtn" type="button"><span class="icon">✎</span><span>Editor On</span></button>
+<button class="tool-btn large" id="previewToggleBtn" type="button"><span class="icon">👁</span><span>Preview On</span></button>
 </div><div class="ribbon-group-label">Display</div></div>
 <div class="ribbon-group"><div class="ribbon-group-body">
 <div class="ribbon-col">
@@ -281,24 +283,24 @@
 <div class="outline-empty">Headings will appear here as you write.</div>
 </div>
 </aside>
-<section class="pane editor-pane">
+<section class="pane editor-pane" id="editorPane">
 <div class="pane-header"><div class="pane-title">Editor</div><div class="pane-meta"><span class="kbd">Tab</span> inserts spaces</div></div>
 <div class="editor-wrap"><div class="document-surface"><textarea id="editor" spellcheck="false"></textarea></div></div>
 </section>
 <div aria-label="Resize panes" class="resizer" id="resizer"></div>
-<section class="pane preview-pane">
+<section class="pane preview-pane" id="previewPane">
 <div class="pane-header"><div class="pane-title">Preview</div><div class="pane-meta" id="renderState">Rendered</div></div>
 <div class="preview-wrap"><div class="document-surface"><div class="preview" id="preview"><div class="print-page" id="printPage"></div></div></div></div>
 </section>
 </main>
 <footer class="statusbar">
-<div class="status-group"><span>Mike Markdown Editor (MME) v5 v5</span><span id="wordCount">Words: 0</span><span id="charCount">Characters: 0</span><span id="lineCount">Lines: 1</span></div>
+<div class="status-group"><span>Mike Markdown Editor (MME) v6</span><span id="wordCount">Words: 0</span><span id="charCount">Characters: 0</span><span id="lineCount">Lines: 1</span></div>
 <div class="status-group"><span id="saveState">Saved locally</span><span id="cursorState">Ln 1, Col 1</span></div>
 </footer>
 </div>
 <div class="drawer-backdrop" id="drawerBackdrop"></div>
 <aside aria-hidden="true" class="side-drawer" id="sideDrawer">
-<div class="drawer-header"><div class="drawer-title">Mike Markdown Editor (MME) v5 v5</div><button class="drawer-btn drawer-close" id="drawerCloseBtn" type="button">✕</button></div>
+<div class="drawer-header"><div class="drawer-title">Mike Markdown Editor (MME) v6</div><button class="drawer-btn drawer-close" id="drawerCloseBtn" type="button">✕</button></div>
 <div class="drawer-body">
 <div class="drawer-section"><div class="drawer-section-title">File</div><div class="drawer-section-body">
 <button class="drawer-btn primary" id="drawerNewBtn" type="button">New</button>
@@ -311,6 +313,8 @@
 <button class="drawer-btn" id="drawerThemeBtn" type="button">Dark Mode</button>
 <button class="drawer-btn" id="drawerFullscreenBtn" type="button">Fullscreen</button>
 <button class="drawer-btn" id="drawerOutlineBtn" type="button">Hide Outline</button>
+<button class="drawer-btn" id="drawerEditorBtn" type="button">Hide Editor</button>
+<button class="drawer-btn" id="drawerPreviewBtn" type="button">Hide Preview</button>
 </div></div>
 <div class="drawer-section"><div class="drawer-section-title">Quick Insert</div><div class="drawer-section-body">
 <button class="drawer-btn" data-drawer-action="h1" type="button">Heading 1</button>
@@ -331,12 +335,16 @@
     const RIBBON_KEY = "mike_editor_ribbon_collapsed_v14";
     const OUTLINE_KEY = "mike_editor_outline_open_v15";
     const PANE_KEY = "mike_editor_pane_width_v15";
+    const EDITOR_VISIBLE_KEY = "mike_editor_editor_visible_v16";
+    const PREVIEW_VISIBLE_KEY = "mike_editor_preview_visible_v16";
 
-    const UIState = { activeRibbonTab: "home", ribbonCollapsed: false, drawerOpen: false, fullscreen: false, paneWidth: 50, wrapEnabled: true, outlineOpen: true, theme: "light", mobilePreview: false };
+    const UIState = { activeRibbonTab: "home", ribbonCollapsed: false, drawerOpen: false, fullscreen: false, paneWidth: 50, wrapEnabled: true, outlineOpen: true, theme: "light", mobilePreview: false, editorVisible: true, previewVisible: true };
 
     const editor = document.getElementById("editor");
     const printPage = document.getElementById("printPage");
     const workspace = document.getElementById("workspace");
+    const editorPane = document.getElementById("editorPane");
+    const previewPane = document.getElementById("previewPane");
     const resizer = document.getElementById("resizer");
     const ribbon = document.getElementById("ribbon");
     const outlineSidebar = document.getElementById("outlineSidebar");
@@ -362,6 +370,10 @@
     const drawerCloseBtn = document.getElementById("drawerCloseBtn");
     const outlineToggleBtn = document.getElementById("outlineToggleBtn");
     const drawerOutlineBtn = document.getElementById("drawerOutlineBtn");
+    const editorToggleBtn = document.getElementById("editorToggleBtn");
+    const previewToggleBtn = document.getElementById("previewToggleBtn");
+    const drawerEditorBtn = document.getElementById("drawerEditorBtn");
+    const drawerPreviewBtn = document.getElementById("drawerPreviewBtn");
     const sidebarCollapseBtn = document.getElementById("sidebarCollapseBtn");
     const ribbonCollapseBtn = document.getElementById("ribbonCollapseBtn");
     const writeTab = document.getElementById("writeTab");
@@ -371,9 +383,9 @@
 
     const defaultDoc = `# New Document
 
-Created in **Mike Markdown Editor (MME) v5**
+Created in **Mike Markdown Editor (MME) v6**
 
-Multi-ribbon Markdown Editor with Mermaid support.
+Document-first Markdown Editor with Mermaid Support.
 
 ## Mermaid Example
 
@@ -530,17 +542,76 @@ flowchart TD
       localStorage.setItem(RIBBON_KEY, UIState.ribbonCollapsed ? "1" : "0");
     }
 
+    
+    function updatePaneButtons() {
+      if (editorToggleBtn) {
+        editorToggleBtn.querySelector("span:last-child").textContent = UIState.editorVisible ? "Editor On" : "Editor Off";
+        editorToggleBtn.querySelector(".icon").textContent = UIState.editorVisible ? "✎" : "✕";
+      }
+      if (previewToggleBtn) {
+        previewToggleBtn.querySelector("span:last-child").textContent = UIState.previewVisible ? "Preview On" : "Preview Off";
+        previewToggleBtn.querySelector(".icon").textContent = UIState.previewVisible ? "👁" : "✕";
+      }
+      if (drawerEditorBtn) drawerEditorBtn.textContent = UIState.editorVisible ? "Hide Editor" : "Show Editor";
+      if (drawerPreviewBtn) drawerPreviewBtn.textContent = UIState.previewVisible ? "Hide Preview" : "Show Preview";
+    }
+
+    function setEditorVisible(open) {
+      if (!open && !UIState.previewVisible) return;
+      UIState.editorVisible = open;
+      localStorage.setItem(EDITOR_VISIBLE_KEY, open ? "1" : "0");
+      applyLayout();
+    }
+
+    function setPreviewVisible(open) {
+      if (!open && !UIState.editorVisible) return;
+      UIState.previewVisible = open;
+      localStorage.setItem(PREVIEW_VISIBLE_KEY, open ? "1" : "0");
+      applyLayout();
+    }
+
     function applyLayout() {
       const isMobile = window.innerWidth <= 900;
       const canShowOutline = window.innerWidth > 1020;
+      const showEditor = UIState.editorVisible;
+      const showPreview = UIState.previewVisible;
+
       workspace.classList.toggle("mobile-layout", isMobile);
       workspace.classList.toggle("outline-closed", !UIState.outlineOpen || !canShowOutline);
-      workspace.classList.toggle("mobile-preview", isMobile && UIState.mobilePreview);
+      workspace.classList.toggle("mobile-preview", isMobile && UIState.mobilePreview && showPreview);
+
       outlineSidebar.style.display = UIState.outlineOpen && canShowOutline ? "flex" : "none";
+
+      if (editorPane) {
+        editorPane.style.display = showEditor ? "flex" : "none";
+        editorPane.style.flex = !showPreview ? "1 1 100%" : "";
+        editorPane.style.maxWidth = !showPreview ? "100%" : "";
+      }
+
+      if (previewPane) {
+        previewPane.style.display = showPreview ? "flex" : "none";
+        previewPane.style.flex = !showEditor ? "1 1 100%" : "";
+        previewPane.style.maxWidth = !showEditor ? "100%" : "";
+      }
+
+      if (resizer) {
+        resizer.style.display = showEditor && showPreview && !isMobile ? "block" : "none";
+      }
+
       outlineToggleBtn.querySelector("span:last-child").textContent = UIState.outlineOpen ? "Outline On" : "Outline Off";
       drawerOutlineBtn.textContent = UIState.outlineOpen ? "Hide Outline" : "Show Outline";
-      writeTab.classList.toggle("active", !UIState.mobilePreview);
-      previewTab.classList.toggle("active", UIState.mobilePreview);
+      writeTab.classList.toggle("active", !UIState.mobilePreview || !showPreview);
+      previewTab.classList.toggle("active", UIState.mobilePreview && showPreview);
+      writeTab.disabled = !showEditor;
+      previewTab.disabled = !showPreview;
+
+      if (!showEditor && showPreview) {
+        UIState.mobilePreview = true;
+      } else if (showEditor && !showPreview) {
+        UIState.mobilePreview = false;
+      }
+
+      updatePaneButtons();
     }
 
     function setOutlineOpen(open) {
@@ -668,6 +739,9 @@ flowchart TD
       toggleRibbonCollapse(localStorage.getItem(RIBBON_KEY) === "1");
       setPaneWidth(Number(localStorage.getItem(PANE_KEY) || 50));
       UIState.outlineOpen = localStorage.getItem(OUTLINE_KEY) !== "0";
+      UIState.editorVisible = localStorage.getItem(EDITOR_VISIBLE_KEY) !== "0";
+      UIState.previewVisible = localStorage.getItem(PREVIEW_VISIBLE_KEY) !== "0";
+      if (!UIState.editorVisible && !UIState.previewVisible) UIState.previewVisible = true;
       applyLayout();
       render();
       updateStats();
@@ -694,7 +768,11 @@ flowchart TD
     fullscreenRibbonBtn.onclick = toggleFullscreen;
     drawerFullscreenBtn.onclick = async () => { closeDrawer(); await toggleFullscreen(); };
     outlineToggleBtn.onclick = () => setOutlineOpen(!UIState.outlineOpen);
+    editorToggleBtn.onclick = () => setEditorVisible(!UIState.editorVisible);
+    previewToggleBtn.onclick = () => setPreviewVisible(!UIState.previewVisible);
     drawerOutlineBtn.onclick = () => { setOutlineOpen(!UIState.outlineOpen); closeDrawer(); };
+    drawerEditorBtn.onclick = () => { setEditorVisible(!UIState.editorVisible); closeDrawer(); };
+    drawerPreviewBtn.onclick = () => { setPreviewVisible(!UIState.previewVisible); closeDrawer(); };
     sidebarCollapseBtn.onclick = () => setOutlineOpen(false);
     ribbonCollapseBtn.onclick = () => toggleRibbonCollapse();
     document.getElementById("panePreset40").onclick = () => setPaneWidth(40);
@@ -743,13 +821,13 @@ flowchart TD
 
     let isDragging = false;
     resizer.onmousedown = () => {
-      if (window.innerWidth <= 900) return;
+      if (window.innerWidth <= 900 || !UIState.editorVisible || !UIState.previewVisible) return;
       isDragging = true;
       document.body.style.userSelect = "none";
       document.body.style.cursor = "col-resize";
     };
     window.onmousemove = (e) => {
-      if (!isDragging || window.innerWidth <= 900) return;
+      if (!isDragging || window.innerWidth <= 900 || !UIState.editorVisible || !UIState.previewVisible) return;
       const rect = workspace.getBoundingClientRect();
       setPaneWidth(((e.clientX - rect.left) / rect.width) * 100);
     };
