@@ -49,19 +49,19 @@ No installation. No dependencies. No backend.
 
 ## Current Version
 
-v4
+v5
 
-This version establishes a stable foundation for future development.
+This version establishes a stable and scalable layout foundation for all future features.
 
-### Key Improvements in v4
+### Key Improvements in v5
 
-• Fully functional dark mode (consistent across ribbon, panes, scrollbars)  
-• Outline sidebar (toggleable)  
-• Fixed editor pane height and scrolling  
-• Fixed layout issues when toggling outline  
-• Split editor and preview working reliably  
-• Mermaid rendering integrated  
-• Local autosave and state persistence  
+• Fully refactored layout system (predictable pane behaviour)  
+• Stable scrolling regions (no more layout conflicts)  
+• Clean outline toggle logic (no UI breakage)  
+• Improved resize handling and pane persistence  
+• Mobile layout unification  
+• Reduced layout bugs from conflicting height calculations  
+• Strong base for real-time rendering (v6)  
 
 ---
 
@@ -145,24 +145,20 @@ Mermaid
 
 ---
 
-## Development Roadmap (Rebased from v4)
+## Development Roadmap (Rebased from v5)
 
 | Version | Focus | Key Goal |
 |--------|------|----------|
-| v5 | Layout System Refactor | Stabilise pane sizing, scrolling, fullscreen, responsiveness |
-| v6 | Ribbon Expansion Phase 1 | Expand toolbar with core markdown actions |
-| v7 | Editing Commands Engine | Reliable, cursor-aware editing logic |
-| v8 | Outline Upgrade | Click navigation, sync, hierarchy |
-| v9 | View Modes | Editor-only, preview-only, split, live |
-| v10 | File Handling UX | Autosave, recovery, import/export polish |
-| v11 | Markdown Power Tools | Tables, callouts, templates, Mermaid presets |
-| v12 | Search and Replace | Find, replace, navigation tools |
-| v13 | Theme System 2.0 | Multi-theme support |
-| v14 | Document Experience | Stats, reading time, writing UX |
-| v15 | Export System 2.0 | Clean HTML export, print improvements |
-| v16 | Settings System | Persistent preferences |
-| v17 | Architecture Refactor | Modular internal structure |
-| v18 | UX Polish | Final interaction and performance refinement |
+| v6 | Real-Time Rendering | Inline live rendering (WYSIWYG-lite) without breaking Markdown |
+| v7 | Advanced Ribbon System | Expand to Word-like full toolbar system |
+| v8 | Document Navigation | Smart outline, search, section folding |
+| v9 | Theme System | Full theming and customisation |
+| v10 | Export Engine | Professional export (HTML, PDF, DOCX basics) |
+| v11 | Plugin Architecture | Extendability and modular features |
+| v12 | Performance Layer | Large file handling and smooth editing |
+| v13 | Versioning System | History, snapshots, diff viewer |
+| v14 | AI Writing Layer | Assistive editing and formatting tools |
+| v15 | System Polish | UX refinement and production readiness |
 
 ---
 
