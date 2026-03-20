@@ -9,29 +9,63 @@ https://averydimbulb79.github.io/mike_editor/index.html
 
 ## Overview
 
-Mike Editor is a browser-based Markdown writing environment designed to behave more like a document editor than a plain text editor.
+Mike Markdown Editor (MME) is a browser-based Markdown writing environment designed to behave more like a document editor than a plain text editor.
 
-The project began with a simple frustration: most Markdown editors produce poor printable output.
+It treats Markdown not as raw syntax, but as a structured document surface that can be rendered cleanly, navigated intuitively, and exported reliably.
 
-When exporting or printing Markdown documents, many tools generate PDFs with:
+The core problem it addresses is simple:
+
+Most Markdown editors produce poor output when printing or exporting.
+
+Typical issues include:
 
 • no margins  
-• no page borders  
-• poor typography  
-• diagrams cut off  
-• inconsistent formatting  
+• no page structure  
+• broken diagrams  
+• inconsistent typography  
+• unreadable layouts  
 
-This makes them unsuitable for producing clean documents, articles, or printable reports.
+MME is built to solve this by focusing on document integrity from the start.
 
-Mike Editor experiments with a different approach. Instead of treating Markdown as raw text, it treats it as a structured document surface that can be rendered cleanly on screen and exported to a properly formatted page.
+---
 
-The editor includes a print pipeline specifically designed to produce decent PDF output directly from the browser.
+## What Makes It Different
+
+MME prioritises document quality over raw editing speed.
+
+The editor is designed around:
+
+• structured document rendering  
+• predictable layout behaviour  
+• clean print output  
+• visual editing support  
+• desktop-style interaction patterns  
+
+It runs entirely in the browser as a single HTML file.
+
+No installation. No dependencies. No backend.
+
+---
+
+## Current Version
+
+v4
+
+This version establishes a stable foundation for future development.
+
+### Key Improvements in v4
+
+• Fully functional dark mode (consistent across ribbon, panes, scrollbars)  
+• Outline sidebar (toggleable)  
+• Fixed editor pane height and scrolling  
+• Fixed layout issues when toggling outline  
+• Split editor and preview working reliably  
+• Mermaid rendering integrated  
+• Local autosave and state persistence  
 
 ---
 
 ## Live Demo
-
-You can run the editor directly here:
 
 https://averydimbulb79.github.io/mike_editor/index.html
 
@@ -41,11 +75,11 @@ No installation required.
 
 ## Why This Editor Exists
 
-Most Markdown tools prioritise editing speed and developer workflows.
+Most Markdown tools prioritise developer workflows.
 
-Very few prioritise document quality when printing.
+Very few prioritise document quality.
 
-The main design goals of Mike Editor are:
+MME is designed to bridge that gap by focusing on:
 
 • readable document layout  
 • clean printable output  
@@ -53,23 +87,19 @@ The main design goals of Mike Editor are:
 • diagram compatibility  
 • a familiar desktop-style interface  
 
-The editor is intentionally built as a single-file browser application so it can run locally without installation.
-
 ---
 
 ## Secondary Goal: Testing "Vibe Coding"
 
-This project is also an experiment in vibe coding with ChatGPT.
+This project is also an experiment in AI-assisted development.
 
-Rather than following a traditional development process, the editor was iteratively built through conversation with AI.
+Rather than following a traditional development process, the editor was iteratively built through structured collaboration with ChatGPT.
 
 The experiment explores:
 
-• how far AI-assisted development can go  
-• how complex a UI tool can be built through iterative prompting  
-• whether conversational design can replace traditional planning for certain types of software  
-
-Every feature in the current version was developed through iterative collaboration with ChatGPT.
+• how far AI-assisted development can scale  
+• how complex a UI system can be built through iterative prompting  
+• whether conversational design can complement traditional engineering workflows  
 
 ---
 
@@ -77,6 +107,7 @@ Every feature in the current version was developed through iterative collaborati
 
 • Multi-tab ribbon interface  
 • Split editor and preview layout  
+• Outline sidebar navigation  
 • Mermaid diagram rendering  
 • Word, character, and line statistics  
 • Markdown export  
@@ -84,21 +115,19 @@ Every feature in the current version was developed through iterative collaborati
 • Print-ready document rendering  
 • Adjustable editor and preview panes  
 • Local autosave  
-• Responsive mobile layout  
+• Responsive layout  
 
 ---
 
-## Running the Editor Locally
+## Running Locally
 
-Download the file:
+Download:
 
 index.html
 
-Open it in any modern browser.
+Open in any modern browser.
 
-No installation is required.
-
-The editor runs entirely locally in the browser.
+No installation required.
 
 ---
 
@@ -116,50 +145,30 @@ Mermaid
 
 ---
 
-## Development Roadmap
+## Development Roadmap (Rebased from v4)
 
-Mike Editor is being developed through a structured revision roadmap designed to gradually transform the project into a full Markdown document IDE.
-
-### Mike Editor Development Roadmap
-
-| Revision | Focus | Key Features |
-|--------|------|-------------|
-| 1 | Core Stabilisation | Ribbon switching, command system cleanup, print pipeline fixes |
-| 2 | Ribbon Expansion | Populate ribbon tabs with formatting commands |
-| 3 | Desktop UI Upgrade | Collapsible ribbon, document page surface |
-| 4 | Document Navigation | Outline sidebar, heading navigator |
-| 5 | Workspace Modes | Editor-only, preview-only, focus mode |
-| 6 | Editor Intelligence | Find and replace, statistics, document insights |
-| 7 | Command Palette | Searchable command palette |
-| 8 | Live Markdown Rendering | Obsidian-style inline rendering |
-| 9 | Live Editing Engine | Stable block-based Markdown editing |
-| 10 | Rich Object Rendering | Inline diagrams, images, editable tables |
-
----
-
-## Milestones
-
-Milestone A  
-Revisions 1–3  
-A polished desktop-style Markdown editor.
-
-Milestone B  
-Revisions 4–6  
-Document-aware writing environment with navigation tools.
-
-Milestone C  
-Revisions 7–8  
-Modern editing workflow with command palette and live rendering.
-
-Milestone D  
-Revisions 9–10  
-Full document editor with inline diagrams and rich objects.
+| Version | Focus | Key Goal |
+|--------|------|----------|
+| v5 | Layout System Refactor | Stabilise pane sizing, scrolling, fullscreen, responsiveness |
+| v6 | Ribbon Expansion Phase 1 | Expand toolbar with core markdown actions |
+| v7 | Editing Commands Engine | Reliable, cursor-aware editing logic |
+| v8 | Outline Upgrade | Click navigation, sync, hierarchy |
+| v9 | View Modes | Editor-only, preview-only, split, live |
+| v10 | File Handling UX | Autosave, recovery, import/export polish |
+| v11 | Markdown Power Tools | Tables, callouts, templates, Mermaid presets |
+| v12 | Search and Replace | Find, replace, navigation tools |
+| v13 | Theme System 2.0 | Multi-theme support |
+| v14 | Document Experience | Stats, reading time, writing UX |
+| v15 | Export System 2.0 | Clean HTML export, print improvements |
+| v16 | Settings System | Persistent preferences |
+| v17 | Architecture Refactor | Modular internal structure |
+| v18 | UX Polish | Final interaction and performance refinement |
 
 ---
 
 ## Long-Term Vision
 
-The long-term goal is to create a Markdown editor that combines:
+The goal is to create a Markdown editor that combines:
 
 • the structure of Markdown  
 • the usability of Word  
