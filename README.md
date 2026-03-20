@@ -1,4 +1,4 @@
-# Mike Editor
+# Mike Markdown Editor (MME)
 
 Multi-Ribbon Markdown Editor with Mermaid Support
 
