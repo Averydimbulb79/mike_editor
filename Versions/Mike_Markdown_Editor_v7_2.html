@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
+<title>Mike Markdown Editor (MME) — Document-first Markdown Editor with Mermaid Support</title>
+<meta content="Mike Markdown Editor (MME) — Document-first Markdown Editor with Mermaid Support" name="generator"/>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.5/dist/purify.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+    :root {
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --topbar-h: 60px;
+      --status-h: 42px;
+      --editor-width: 50%;
+      --outline-width: 250px;
+      --resizer-width: 8px;
+      --font-ui: "Segoe UI", Inter, system-ui, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    body[data-theme="light"] {
+      --bg: #eef1f5; --app: #ffffff; --surface: #ffffff; --surface-2: #f7f8fa; --surface-3: #fbfcfe;
+      --panel: #f8fafc; --line: #d8dde6; --line-2: #c8d0db; --text: #1f2732; --muted: #697586;
+      --heading: #0f141a; --accent: #2563eb; --accent-soft: #e8f0ff; --shadow-soft: 0 2px 10px rgba(20,30,50,.05);
+      --shadow-panel: 0 10px 28px rgba(20,30,50,.08); --doc-bg: #ffffff; --code-bg: #1f2530; --code-text: #f4f7fb;
+      --quote-bg: #f6f9ff; --quote-text: #465468; --selection: rgba(37,99,235,.15); --sidebar-bg: #f7f9fb;
+    }
+    body[data-theme="dark"] {
+      --bg: #0f1217; --app: #141922; --surface: #151b24; --surface-2: #11161e; --surface-3: #1b2330;
+      --panel: #10161f; --line: #2a3342; --line-2: #354054; --text: #e8edf5; --muted: #98a4b5;
+      --heading: #ffffff; --accent: #6da5ff; --accent-soft: rgba(109,165,255,.16); --shadow-soft: 0 2px 12px rgba(0,0,0,.22);
+      --shadow-panel: 0 12px 30px rgba(0,0,0,.3); --doc-bg: #10161f; --code-bg: #0c1017; --code-text: #eef3fb;
+      --quote-bg: #162133; --quote-text: #d8e4f8; --selection: rgba(109,165,255,.22); --sidebar-bg: #10161f;
+    }
+    html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: var(--font-ui); }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    ::selection { background: var(--selection); }
+    body.drawer-open { overflow: hidden; }
+    .app { height: 100dvh; display: grid; grid-template-rows: calc(var(--topbar-h) + var(--safe-top)) auto auto minmax(0,1fr) calc(var(--status-h) + var(--safe-bottom)); background: var(--app); overflow: hidden; }
+    .topbar { padding-top: var(--safe-top); display: flex; align-items: center; justify-content: space-between; gap: 14px; padding-left: 16px; padding-right: 16px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--app) 94%, transparent); box-shadow: var(--shadow-soft); z-index: 70; position: relative; }
+    .topbar-left, .topbar-right { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .app-badge { width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; font-weight: 800; color: white; background: linear-gradient(135deg,#3b82f6,#1d4ed8); box-shadow: 0 10px 18px rgba(37,99,235,.25); }
+    .brand-title { font-size: 16px; font-weight: 700; color: var(--heading); line-height: 1.1; }
+    .brand-subtitle { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .quick-actions { display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; }
+    .quick-btn,.file-label,.menu-btn,.drawer-btn,.sidebar-btn,.tool-btn,.mobile-switch-btn,.outline-item,.ribbon-tab {
+      border: 1px solid var(--line); background: var(--surface); color: var(--text); font: inherit; cursor: pointer; transition: .15s ease;
+    }
+    .quick-btn,.file-label,.menu-btn,.drawer-btn,.sidebar-btn {
+      height: 38px; min-width: 38px; padding: 0 14px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none;
+    }
+    .quick-btn:hover,.file-label:hover,.menu-btn:hover,.drawer-btn:hover,.sidebar-btn:hover,.tool-btn:hover,.outline-item:hover,.mobile-switch-btn:hover { background: var(--surface-3); border-color: var(--line-2); }
+    .quick-btn.primary,.drawer-btn.primary { background: var(--accent); border-color: var(--accent); color: white; }
+    .menu-btn { display: none; min-width: 42px; padding: 0 12px; font-size: 18px; line-height: 1; }
+    input[type=file] { display: none; }
+    .ribbon-tabs { display: flex; align-items: end; gap: 4px; padding: 8px 14px 0; border-bottom: 1px solid var(--line); background: var(--surface-2); overflow-x: auto; }
+    .ribbon-tab { height: 36px; padding: 0 14px; border-bottom: none; border-radius: 10px 10px 0 0; background: transparent; color: var(--muted); font-size: 13px; font-weight: 700; flex: 0 0 auto; }
+    .ribbon-tab.active { background: var(--surface); color: var(--accent); }
+    .ribbon { background: var(--surface); border-bottom: 1px solid var(--line); padding: 10px 12px; overflow-x: auto; overflow-y: hidden; max-height: 220px; transition: max-height .18s ease, padding .18s ease, border-color .18s ease; }
+    .ribbon.collapsed { max-height: 0; padding-top: 0; padding-bottom: 0; border-bottom-color: transparent; }
+    .ribbon-panel { display: none; }
+    .ribbon-panel.active { display: block; }
+    .ribbon-row { display: flex; align-items: stretch; gap: 10px; min-width: max-content; }
+    .ribbon-group { display: grid; grid-template-rows: 1fr auto; min-width: fit-content; border: 1px solid var(--line); background: linear-gradient(180deg,var(--surface) 0%,var(--panel) 100%); border-radius: 12px; overflow: hidden; }
+    .ribbon-group-body { display: flex; gap: 6px; padding: 8px; align-items: stretch; min-height: 72px; }
+    .ribbon-group-label { border-top: 1px solid var(--line); background: var(--surface-2); color: var(--muted); font-size: 11px; text-align: center; padding: 4px 8px; }
+    .ribbon-col { display: flex; flex-direction: column; gap: 6px; }
+    .ribbon-stack { display: grid; grid-template-columns: repeat(2, minmax(42px, auto)); gap: 6px; }
+    .tool-btn { min-width: 42px; height: 30px; padding: 0 10px; border-radius: 8px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; }
+    .tool-btn.large { width: 88px; height: 64px; flex-direction: column; padding: 8px 6px; line-height: 1.05; font-size: 11px; font-weight: 700; text-align: center; white-space: normal; }
+    .mobile-view-switch { display: none; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--line); background: var(--surface-3); }
+    .mobile-switch-btn { flex: 1; height: 38px; border-radius: 10px; color: var(--muted); font-size: 13px; font-weight: 700; }
+    .mobile-switch-btn.active { background: var(--accent-soft); color: var(--accent); border-color: color-mix(in srgb, var(--accent) 55%, var(--line)); }
+    .workspace { min-height: 0; min-width: 0; display: grid; grid-template-columns: var(--outline-width) minmax(320px,var(--editor-width)) var(--resizer-width) minmax(320px,1fr); background: var(--bg); overflow: hidden; }
+    .workspace.outline-closed { grid-template-columns: minmax(320px,var(--editor-width)) var(--resizer-width) minmax(320px,1fr); }
+    .workspace.outline-closed .sidebar { display: none !important; }
+    .workspace.mobile-layout { grid-template-columns: 1fr; }
+    .workspace.mobile-layout .sidebar, .workspace.mobile-layout .resizer { display: none !important; }
+    .workspace.mobile-layout .pane.preview-pane { display: none; }
+    .workspace.mobile-layout.mobile-preview .pane.editor-pane { display: none; }
+    .workspace.mobile-layout.mobile-preview .pane.preview-pane { display: flex; }
+    .sidebar,.pane { min-width: 0; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+    .sidebar { border-right: 1px solid var(--line); background: var(--sidebar-bg); }
+    .sidebar-header,.pane-header { height: 44px; flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 16px; border-bottom: 1px solid var(--line); background: var(--surface-3); }
+    .sidebar-title,.pane-title { font-size: 12px; font-weight: 800; color: var(--heading); text-transform: uppercase; letter-spacing: .04em; }
+    .pane-meta { font-size: 12px; color: var(--muted); }
+    .outline-body { min-height: 0; overflow: auto; padding: 10px; }
+    .outline-empty { font-size: 13px; color: var(--muted); padding: 10px; line-height: 1.5; }
+    .outline-item { width: 100%; text-align: left; border: 1px solid transparent; background: transparent; border-radius: 8px; padding: 8px 10px; display: block; margin-bottom: 4px; }
+    .outline-level-1 { padding-left: 10px; font-weight: 700; } .outline-level-2 { padding-left: 22px; } .outline-level-3 { padding-left: 34px; } .outline-level-4 { padding-left: 46px; } .outline-level-5 { padding-left: 58px; } .outline-level-6 { padding-left: 70px; }
+    .editor-wrap, .preview-wrap { min-height: 0; flex: 1 1 auto; overflow: auto; background: var(--bg); }
+    .editor-wrap { padding: 26px 18px; }
+    .preview-wrap { padding: 26px 18px; }
+    .editor-wrap .document-surface, .preview-wrap .document-surface { min-height: 100%; display: flex; flex-direction: column; }
+    textarea { width: 100%; flex: 1 1 auto; min-height: 0; border: none; outline: none; resize: none; display: block; background: transparent; color: var(--text); padding: clamp(16px,2vw,28px); font: 15px/1.75 var(--font-mono); white-space: pre-wrap; overflow-wrap: break-word; tab-size: 2; overflow: auto; caret-color: var(--accent); }
+    .document-surface { width: min(100%, 920px); margin: 0 auto; background: var(--doc-bg); box-shadow: var(--shadow-panel); border-radius: 10px; min-height: 100%; border: 1px solid var(--line); }
+    .preview { min-height: 100%; padding: clamp(20px,2vw,36px); background: transparent; line-height: 1.75; color: var(--text); }
+    .print-page { max-width: 920px; margin: 0 auto; background: transparent; }
+    .mermaid-wrapper { margin: 1.2em 0; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-3); overflow: auto; }
+    .mermaid-wrapper svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+    .mermaid-error { color: #b42318; background: #fff4f2; border: 1px solid #f5c2c7; border-radius: 10px; padding: 12px 14px; font-family: var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere; }
+    .resizer { position: relative; background: linear-gradient(180deg,var(--surface-2) 0%,var(--surface-3) 100%); border-left: 1px solid var(--line); border-right: 1px solid var(--line); cursor: col-resize; }
+    .resizer::after { content: ""; position: absolute; top: 50%; left: 50%; width: 3px; height: 48px; transform: translate(-50%,-50%); border-radius: 999px; background: color-mix(in srgb, var(--muted) 55%, transparent); }
+    .statusbar { padding: 0 16px calc(var(--safe-bottom)); display: flex; align-items: center; justify-content: space-between; gap: 14px; border-top: 1px solid var(--line); background: var(--surface-3); color: var(--muted); font-size: 12px; min-height: calc(var(--status-h) + var(--safe-bottom)); flex-wrap: wrap; }
+    .status-group { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; min-height: var(--status-h); }
+    .kbd { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; border-radius: 6px; border: 1px solid var(--line); background: var(--surface); color: var(--muted); font-size: 11px; font-weight: 700; padding: 0 6px; }
+    .preview h1,.preview h2,.preview h3,.preview h4,.preview h5,.preview h6,.print-page h1,.print-page h2,.print-page h3,.print-page h4,.print-page h5,.print-page h6 { color: var(--heading); line-height: 1.28; letter-spacing: -.02em; margin: 1.25em 0 .55em; }
+    .preview h1,.print-page h1 { font-size: 2rem; border-bottom: 1px solid var(--line); padding-bottom: .24em; }
+    .preview h2,.print-page h2 { font-size: 1.6rem; border-bottom: 1px solid var(--line); padding-bottom: .2em; }
+    .preview h3,.print-page h3 { font-size: 1.28rem; }
+    .preview p,.print-page p { margin: .9em 0; }
+    .preview a,.print-page a { color: var(--accent); text-decoration: none; }
+    .preview a:hover,.print-page a:hover { text-decoration: underline; }
+    .preview blockquote,.print-page blockquote { margin: 1.2em 0; padding: .85em 1em; border-left: 4px solid var(--accent); background: var(--quote-bg); color: var(--quote-text); border-radius: 0 10px 10px 0; }
+    .preview hr,.print-page hr { border: none; border-top: 1px solid var(--line); margin: 2em 0; }
+    .preview pre,.print-page pre { background: var(--code-bg); color: var(--code-text); border-radius: 12px; padding: 16px; overflow: auto; }
+    .preview code,.print-page code { font-family: var(--font-mono); font-size: .92em; }
+    .preview :not(pre)>code,.print-page :not(pre)>code { background: var(--surface-3); border: 1px solid var(--line); padding: .14em .4em; border-radius: 8px; }
+    .preview table,.print-page table { width: 100%; border-collapse: collapse; margin: 1.2em 0; box-shadow: 0 0 0 1px var(--line) inset; border-radius: 12px; overflow: hidden; }
+    .preview th,.preview td,.print-page th,.print-page td { border: 1px solid var(--line); padding: 11px 12px; text-align: left; }
+    .preview th,.print-page th { background: var(--surface-3); font-weight: 700; }
+    .preview img,.print-page img { max-width: 100%; border-radius: 12px; }
+    .preview ul,.preview ol,.print-page ul,.print-page ol { padding-left: 1.5rem; }
+    .preview li,.print-page li { margin: .3em 0; }
+    .drawer-backdrop { position: fixed; inset: 0; background: rgba(15,20,26,.35); opacity: 0; pointer-events: none; transition: opacity .22s ease; z-index: 110; backdrop-filter: blur(2px); }
+    .drawer-backdrop.open { opacity: 1; pointer-events: auto; }
+    .side-drawer { position: fixed; top: 0; right: 0; width: min(340px,88vw); height: 100dvh; background: color-mix(in srgb, var(--surface) 96%, transparent); border-left: 1px solid var(--line); box-shadow: -12px 0 32px rgba(20,30,50,.14); transform: translateX(100%); transition: transform .24s ease; z-index: 120; display: grid; grid-template-rows: auto 1fr; backdrop-filter: blur(10px); }
+    .side-drawer.open { transform: translateX(0); }
+    .drawer-header { padding-top: var(--safe-top); min-height: calc(60px + var(--safe-top)); display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-left: 14px; padding-right: 14px; border-bottom: 1px solid var(--line); background: var(--surface-3); }
+    .drawer-title { font-size: 15px; font-weight: 700; color: var(--heading); }
+    .drawer-close { width: 38px; padding: 0; font-size: 18px; }
+    .drawer-body { overflow: auto; padding: 14px; padding-bottom: calc(14px + var(--safe-bottom)); display: flex; flex-direction: column; gap: 14px; }
+    .drawer-section { border: 1px solid var(--line); border-radius: 14px; background: linear-gradient(180deg,var(--surface) 0%,var(--panel) 100%); overflow: hidden; }
+    .drawer-section-title { padding: 10px 12px; font-size: 12px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; border-bottom: 1px solid var(--line); background: var(--surface-3); }
+    .drawer-section-body { padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+    @media (max-width: 1020px) { .brand-subtitle { display:none; } }
+    @media (max-width: 920px) { .quick-actions { display: none; } .menu-btn { display: inline-flex; } }
+    @media (max-width: 900px) {
+      .app { grid-template-rows: calc(var(--topbar-h) + var(--safe-top)) auto auto auto minmax(0,1fr) calc(var(--status-h) + var(--safe-bottom)); }
+      .topbar { padding-left: 12px; padding-right: 12px; }
+      .mobile-view-switch { display: flex; }
+      .ribbon { padding: 8px 10px; }
+      .tool-btn.large { width: 72px; height: 60px; }
+      .editor-wrap, .preview-wrap { padding: 14px 10px; }
+      .document-surface { width: 100%; }
+    }
+    @media print {
+      @page { size: auto; margin: 18mm 16mm 18mm 16mm; }
+      html,body { background: white !important; overflow: visible !important; height: auto !important; margin:0 !important; padding:0 !important; }
+      body * { visibility: hidden !important; }
+      .app,.workspace,.preview-pane,.preview-wrap,.document-surface,#preview,#preview *,#printPage,#printPage * { visibility: visible !important; }
+      .topbar,.ribbon-tabs,.ribbon,.mobile-view-switch,.statusbar,.resizer,.editor-pane,.sidebar,.pane-header,.drawer-backdrop,.side-drawer { display: none !important; }
+      .app,.workspace,.preview-pane,.preview-wrap,.document-surface,#preview { display:block !important; width:100% !important; max-width:none !important; height:auto !important; overflow:visible !important; margin:0 !important; padding:0 !important; border:none !important; box-shadow:none !important; background:white !important; }
+      #printPage { display:block !important; width:100% !important; max-width:none !important; margin:0 auto !important; padding:8mm 10mm 10mm 10mm !important; background:white !important; color:black !important; }
+    }
+  </style>
+<meta content="A document-first Markdown editor designed for clean writing, structured layout, and reliable export. Includes Mermaid diagram support." name="description"/></head>
+<body data-theme="light">
+<div class="app">
+<header class="topbar">
+<div class="topbar-left">
+<div class="app-badge">M</div>
+<div class="brand">
+<div class="brand-title">Mike Markdown Editor (MME) v7.2</div>
+<div class="brand-subtitle">Document-first Markdown Editor with Mermaid Support</div>
+</div>
+</div>
+<div class="topbar-right">
+<div class="quick-actions">
+<button class="quick-btn primary" id="newDocBtn" type="button">New</button>
+<label class="file-label" for="importFile">Import</label>
+<button class="quick-btn" id="copyMdBtn" type="button">Copy MD</button>
+<button class="quick-btn" id="copyHtmlBtn" type="button">Copy HTML</button>
+<button class="quick-btn" id="exportMdBtn" type="button">Export</button>
+<button class="quick-btn" id="printBtn" type="button">Print</button>
+<button class="quick-btn" id="themeToggleBtn" type="button">Dark Mode</button>
+<button class="quick-btn" id="fullscreenBtn" type="button">Fullscreen</button>
+</div>
+<button aria-expanded="false" aria-label="Open menu" class="menu-btn" id="menuToggleBtn" type="button">☰</button>
+<input accept=".md,.markdown,.txt" id="importFile" type="file"/>
+</div>
+</header>
+<div class="ribbon-tabs" id="ribbonTabs">
+<button class="ribbon-tab active" data-tab="home" type="button">Home</button>
+<button class="ribbon-tab" data-tab="insert" type="button">Insert</button>
+<button class="ribbon-tab" data-tab="view" type="button">View</button>
+<button class="ribbon-tab" data-tab="export" type="button">Export</button>
+</div>
+<section class="ribbon" id="ribbon">
+<div class="ribbon-panel active" data-panel="home">
+<div class="ribbon-row">
+<div class="ribbon-group"><div class="ribbon-group-body">
+<button class="tool-btn large" id="ribbonCollapseBtn" type="button"><span class="icon">⌃</span><span>Collapse</span></button>
+<button class="tool-btn large" id="insertDateBtn" type="button"><span class="icon">📅</span><span>Date</span></button>
+<button class="tool-btn large" id="findBtn" type="button"><span class="icon">⌕</span><span>Find</span></button>
+<button class="tool-btn large" id="replaceBtn" type="button"><span class="icon">⇄</span><span>Replace</span></button>
+</div><div class="ribbon-group-label">Document</div></div>
+<div class="ribbon-group"><div class="ribbon-group-body">
+<div class="ribbon-col">
+<button class="tool-btn" data-action="h1" type="button">Heading 1</button>
+<button class="tool-btn" data-action="h2" type="button">Heading 2</button>
+</div>
+<div class="ribbon-col">
+<button class="tool-btn" data-action="h3" type="button">Heading 3</button>
+<button class="tool-btn" data-action="h4" type="button">Heading 4</button>
+<button class="tool-btn" data-action="quote" type="button">Quote</button>
+</div>
+</div><div class="ribbon-group-label">Styles</div></div>
+<div class="ribbon-group"><div class="ribbon-group-body">
+<button class="tool-btn large" data-action="bold" type="button"><span class="icon"><strong>B</strong></span><span>Bold</span></button>
+<button class="tool-btn large" data-action="italic" type="button"><span class="icon"><em>I</em></span><span>Italic</span></button>
+<button class="tool-btn large" data-action="strike" type="button"><span class="icon"><s>S</s></span><span>Strike</span></button>
+</div><div class="ribbon-group-label">Font</div></div>
+<div class="ribbon-group"><div class="ribbon-group-body">
+<div class="ribbon-stack">
+<button class="tool-btn" data-action="ul" type="button">Bullets</button>
+<button class="tool-btn" data-action="ol" type="button">Numbers</button>
+<button class="tool-btn" data-action="task" type="button">Tasks</button>
+<button class="tool-btn" data-action="hr" type="button">Rule</button>
+</div>
+</div><div class="ribbon-group-label">Paragraph</div></div>
+<div class="ribbon-group"><div class="ribbon-group-body">
+<div class="ribbon-col">
+<button class="tool-btn large" id="undoBtn" type="button"><span class="icon">↶</span><span>Undo</span></button>
+</div>
+<div class="ribbon-col">
+<button class="tool-btn large" id="redoBtn" type="button"><span class="icon">↷</span><span>Redo</span></button>
+</div>
+</div><div class="ribbon-group-label">History</div></div>
+</div>
+</div>
+<div class="ribbon-panel" data-panel="insert">
+<div class="ribbon-row">
+<div class="ribbon-group"><div class="ribbon-group-body">
+<div class="ribbon-col">
+<button class="tool-btn" data-action="link" type="button">Link</button>
+<button class="tool-btn" data-action="image" type="button">Image URL</button>
+<button class="tool-btn" data-action="toc" type="button">TOC</button>
+</div>
+<div class="ribbon-col">
+<button class="tool-btn" data-action="table" type="button">Table</button>
+<button class="tool-btn" data-action="codeblock" type="button">Code Block</button>
+<button class="tool-btn" data-action="mermaid" type="button">Mermaid</button>
+</div>
+</div><div class="ribbon-group-label">Insert</div></div>
+<div class="ribbon-group"><div class="ribbon-group-body">
+<button class="tool-btn large" data-action="code" type="button"><span class="icon">&lt;/&gt;</span><span>Inline Code</span></button>
+<button class="tool-btn large" data-action="ruleBreak" type="button"><span class="icon">—</span><span>Page Break</span></button>
+</div><div class="ribbon-group-label">Objects</div></div>
+</div>
+</div>
+<div class="ribbon-panel" data-panel="view">
+<div class="ribbon-row">
+<div class="ribbon-group"><div class="ribbon-group-body">
+<button class="tool-btn large" id="themeRibbonBtn" type="button"><span class="icon">☾</span><span>Dark Mode</span></button>
+<button class="tool-btn large" id="fullscreenRibbonBtn" type="button"><span class="icon">⛶</span><span>Fullscreen</span></button>
+<button class="tool-btn large" id="outlineToggleBtn" type="button"><span class="icon">≡</span><span>Outline On</span></button>
+<button class="tool-btn large" id="editorToggleBtn" type="button"><span class="icon">✎</span><span>Editor On</span></button>
+<button class="tool-btn large" id="previewToggleBtn" type="button"><span class="icon">👁</span><span>Preview On</span></button>
+</div><div class="ribbon-group-label">Display</div></div>
+<div class="ribbon-group"><div class="ribbon-group-body">
+<div class="ribbon-col">
+<button class="tool-btn" id="panePreset40" type="button">Editor 40%</button>
+<button class="tool-btn" id="panePreset50" type="button">Editor 50%</button>
+</div>
+<div class="ribbon-col">
+<button class="tool-btn" id="panePreset60" type="button">Editor 60%</button>
+<button class="tool-btn" id="panePreset70" type="button">Editor 70%</button>
+</div>
+</div><div class="ribbon-group-label">Pane Width</div></div>
+</div>
+</div>
+<div class="ribbon-panel" data-panel="export">
+<div class="ribbon-row">
+<div class="ribbon-group"><div class="ribbon-group-body">
+<button class="tool-btn large" id="copyMdRibbonBtn" type="button"><span class="icon">⧉</span><span>Copy MD</span></button>
+<button class="tool-btn large" id="copyRibbonBtn" type="button"><span class="icon">⧉</span><span>Copy HTML</span></button>
+</div><div class="ribbon-group-label">Clipboard</div></div>
+<div class="ribbon-group"><div class="ribbon-group-body">
+<button class="tool-btn large" id="exportRibbonBtn" type="button"><span class="icon">⇩</span><span>Export MD</span></button>
+<button class="tool-btn large" id="exportHtmlRibbonBtn" type="button"><span class="icon">⇩</span><span>Export HTML</span></button>
+<button class="tool-btn large" id="printRibbonBtn" type="button"><span class="icon">🖨</span><span>Print</span></button>
+</div><div class="ribbon-group-label">Export</div></div>
+</div>
+</div>
+</section>
+<div class="mobile-view-switch">
+<button class="mobile-switch-btn active" id="writeTab" type="button">Write</button>
+<button class="mobile-switch-btn" id="previewTab" type="button">Preview</button>
+</div>
+<main class="workspace" id="workspace">
+<aside class="sidebar" id="outlineSidebar">
+<div class="sidebar-header">
+<div class="sidebar-title">Outline</div>
+<button class="sidebar-btn" id="sidebarCollapseBtn" type="button">✕</button>
+</div>
+<div class="outline-body" id="outlineBody">
+<div class="outline-empty">Headings will appear here as you write.</div>
+</div>
+</aside>
+<section class="pane editor-pane" id="editorPane">
+<div class="pane-header"><div class="pane-title">Editor</div><div class="pane-meta"><span class="kbd">Tab</span> inserts spaces</div></div>
+<div class="editor-wrap"><div class="document-surface"><textarea id="editor" spellcheck="false" placeholder="Start writing in Markdown here..."></textarea></div></div>
+</section>
+<div aria-label="Resize panes" class="resizer" id="resizer"></div>
+<section class="pane preview-pane" id="previewPane">
+<div class="pane-header"><div class="pane-title">Preview</div><div class="pane-meta" id="renderState">Rendered</div></div>
+<div class="preview-wrap"><div class="document-surface"><div class="preview" id="preview"><div class="print-page" id="printPage"></div></div></div></div>
+</section>
+</main>
+<footer class="statusbar">
+<div class="status-group"><span>Mike Markdown Editor (MME) v7.2</span><span id="wordCount">Words: 0</span><span id="charCount">Characters: 0</span><span id="lineCount">Lines: 1</span></div>
+<div class="status-group"><span id="saveState">Saved locally</span><span id="cursorState">Ln 1, Col 1</span></div>
+</footer>
+</div>
+<div class="drawer-backdrop" id="drawerBackdrop"></div>
+<aside aria-hidden="true" class="side-drawer" id="sideDrawer">
+<div class="drawer-header"><div class="drawer-title">Mike Markdown Editor (MME) v7.2</div><button class="drawer-btn drawer-close" id="drawerCloseBtn" type="button">✕</button></div>
+<div class="drawer-body">
+<div class="drawer-section"><div class="drawer-section-title">File</div><div class="drawer-section-body">
+<button class="drawer-btn primary" id="drawerNewBtn" type="button">New</button>
+<label class="file-label drawer-btn drawer-file-label" for="importFile">Import</label>
+<button class="drawer-btn" id="drawerExportBtn" type="button">Export</button>
+<button class="drawer-btn" id="drawerCopyMdBtn" type="button">Copy Markdown</button>
+<button class="drawer-btn" id="drawerCopyHtmlBtn" type="button">Copy HTML</button>
+<button class="drawer-btn" id="drawerExportHtmlBtn" type="button">Export HTML</button>
+<button class="drawer-btn" id="drawerPrintBtn" type="button">Print</button>
+</div></div>
+<div class="drawer-section"><div class="drawer-section-title">View</div><div class="drawer-section-body">
+<button class="drawer-btn" id="drawerThemeBtn" type="button">Dark Mode</button>
+<button class="drawer-btn" id="drawerFullscreenBtn" type="button">Fullscreen</button>
+<button class="drawer-btn" id="drawerOutlineBtn" type="button">Hide Outline</button>
+<button class="drawer-btn" id="drawerEditorBtn" type="button">Hide Editor</button>
+<button class="drawer-btn" id="drawerPreviewBtn" type="button">Hide Preview</button>
+</div></div>
+<div class="drawer-section"><div class="drawer-section-title">Quick Insert</div><div class="drawer-section-body">
+<button class="drawer-btn" data-drawer-action="h1" type="button">Heading 1</button>
+<button class="drawer-btn" data-drawer-action="h2" type="button">Heading 2</button>
+<button class="drawer-btn" data-drawer-action="h3" type="button">Heading 3</button>
+<button class="drawer-btn" data-drawer-action="h4" type="button">Heading 4</button>
+<button class="drawer-btn" data-drawer-action="strike" type="button">Strike</button>
+<button class="drawer-btn" data-drawer-action="ul" type="button">Bullets</button>
+<button class="drawer-btn" data-drawer-action="ol" type="button">Numbers</button>
+<button class="drawer-btn" data-drawer-action="task" type="button">Tasks</button>
+<button class="drawer-btn" data-drawer-action="quote" type="button">Quote</button>
+<button class="drawer-btn" data-drawer-action="bold" type="button">Bold</button>
+<button class="drawer-btn" data-drawer-action="italic" type="button">Italic</button>
+<button class="drawer-btn" data-drawer-action="link" type="button">Link</button>
+<button class="drawer-btn" data-drawer-action="table" type="button">Table</button>
+<button class="drawer-btn" data-drawer-action="codeblock" type="button">Code Block</button>
+<button class="drawer-btn" data-drawer-action="mermaid" type="button">Mermaid</button>
+<button class="drawer-btn" data-drawer-action="toc" type="button">TOC</button>
+</div></div>
+</div>
+</aside>
+<script>
+    const STORAGE_KEY = "mike_editor_document_v14";
+    const WRAP_KEY = "mike_editor_wrap_v14";
+    const TAB_KEY = "mike_editor_active_tab_v14";
+    const THEME_KEY = "mike_editor_theme_v14";
+    const RIBBON_KEY = "mike_editor_ribbon_collapsed_v14";
+    const OUTLINE_KEY = "mike_editor_outline_open_v15";
+    const PANE_KEY = "mike_editor_pane_width_v15";
+    const EDITOR_VISIBLE_KEY = "mike_editor_editor_visible_v16";
+    const PREVIEW_VISIBLE_KEY = "mike_editor_preview_visible_v16";
+    const HISTORY_LIMIT = 200;
+
+    const UIState = { activeRibbonTab: "home", ribbonCollapsed: false, drawerOpen: false, fullscreen: false, paneWidth: 50, wrapEnabled: true, outlineOpen: true, theme: "light", mobilePreview: false, editorVisible: true, previewVisible: true };
+
+    const editor = document.getElementById("editor");
+    const printPage = document.getElementById("printPage");
+    const preview = document.getElementById("preview");
+    const workspace = document.getElementById("workspace");
+    const editorPane = document.getElementById("editorPane");
+    const previewPane = document.getElementById("previewPane");
+    const resizer = document.getElementById("resizer");
+    const ribbon = document.getElementById("ribbon");
+    const outlineSidebar = document.getElementById("outlineSidebar");
+    const outlineBody = document.getElementById("outlineBody");
+    const wordCount = document.getElementById("wordCount");
+    const charCount = document.getElementById("charCount");
+    const lineCount = document.getElementById("lineCount");
+    const saveState = document.getElementById("saveState");
+    const cursorState = document.getElementById("cursorState");
+    const renderState = document.getElementById("renderState");
+    const importFile = document.getElementById("importFile");
+    const ribbonTabs = [...document.querySelectorAll(".ribbon-tab")];
+    const ribbonPanels = [...document.querySelectorAll(".ribbon-panel")];
+    const themeToggleBtn = document.getElementById("themeToggleBtn");
+    const themeRibbonBtn = document.getElementById("themeRibbonBtn");
+    const drawerThemeBtn = document.getElementById("drawerThemeBtn");
+    const fullscreenBtn = document.getElementById("fullscreenBtn");
+    const fullscreenRibbonBtn = document.getElementById("fullscreenRibbonBtn");
+    const drawerFullscreenBtn = document.getElementById("drawerFullscreenBtn");
+    const menuToggleBtn = document.getElementById("menuToggleBtn");
+    const drawerBackdrop = document.getElementById("drawerBackdrop");
+    const sideDrawer = document.getElementById("sideDrawer");
+    const drawerCloseBtn = document.getElementById("drawerCloseBtn");
+    const outlineToggleBtn = document.getElementById("outlineToggleBtn");
+    const drawerOutlineBtn = document.getElementById("drawerOutlineBtn");
+    const editorToggleBtn = document.getElementById("editorToggleBtn");
+    const previewToggleBtn = document.getElementById("previewToggleBtn");
+    const drawerEditorBtn = document.getElementById("drawerEditorBtn");
+    const drawerPreviewBtn = document.getElementById("drawerPreviewBtn");
+    const sidebarCollapseBtn = document.getElementById("sidebarCollapseBtn");
+    const ribbonCollapseBtn = document.getElementById("ribbonCollapseBtn");
+    const writeTab = document.getElementById("writeTab");
+    const previewTab = document.getElementById("previewTab");
+    const findBtn = document.getElementById("findBtn");
+    const replaceBtn = document.getElementById("replaceBtn");
+    const undoBtn = document.getElementById("undoBtn");
+    const redoBtn = document.getElementById("redoBtn");
+    const copyMdBtn = document.getElementById("copyMdBtn");
+    const copyMdRibbonBtn = document.getElementById("copyMdRibbonBtn");
+    const exportHtmlRibbonBtn = document.getElementById("exportHtmlRibbonBtn");
+
+    mermaid.initialize({ startOnLoad: false, securityLevel: "loose", theme: "default" });
+
+    const defaultDoc = `# New Document
+
+Created in **Mike Markdown Editor (MME) v7.2**
+
+Document-first Markdown Editor with Mermaid Support.
+
+## Mermaid Example
+
+\`\`\`mermaid
+flowchart TD
+  A[Start] --> B{Decision}
+  B -->|Yes| C[Continue]
+  B -->|No| D[Stop]
+\`\`\`
+`;
+
+    const DocumentModel = {
+      source: "", headings: [], wordCount: 0, charCount: 0, lineCount: 0,
+      analyze(source) {
+        this.source = source;
+        this.wordCount = (source.trim().match(/\S+/g) || []).length;
+        this.charCount = source.length;
+        this.lineCount = source.split("\n").length;
+        this.headings = [];
+        const lines = source.split("\n");
+        let charPos = 0;
+        for (let i = 0; i < lines.length; i++) {
+          const m = /^(#{1,6})\s+(.*)$/.exec(lines[i]);
+          if (m) this.headings.push({ level: m[1].length, text: m[2].trim() || `Heading ${i+1}`, line: i+1, pos: charPos });
+          charPos += lines[i].length + 1;
+        }
+      }
+    };
+
+    const CommandRegistry = {
+      h1: () => applyHeading(1),
+      h2: () => applyHeading(2),
+      h3: () => applyHeading(3),
+      h4: () => applyHeading(4),
+      quote: () => applyLinePrefix("> "),
+      bold: () => applyInlineWrap("**", "**", "bold text"),
+      italic: () => applyInlineWrap("*", "*", "italic text"),
+      strike: () => applyInlineWrap("~~", "~~", "strikethrough"),
+      ul: () => applyLinePrefix("- "),
+      ol: () => applyOrderedList(),
+      task: () => applyChecklist(),
+      hr: () => insertBlock(`\n---\n`),
+      ruleBreak: () => insertBlock(`\n<div style="page-break-after: always;"></div>\n`),
+      link: () => insertLink(),
+      image: () => insertImage(),
+      table: () => insertTable(),
+      codeblock: () => insertCodeBlock(),
+      code: () => applyInlineWrap("`", "`", "inline code"),
+      mermaid: () => insertMermaid(),
+      toc: () => insertTOC()
+    };
+
+    function escapeHtml(text="") {
+      return text.replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
+    }
+
+    async function renderMermaidIn(container) {
+      const blocks = [...container.querySelectorAll("pre > code.language-mermaid")];
+      let index = 0;
+      for (const code of blocks) {
+        const pre = code.parentElement;
+        const wrapper = document.createElement("div");
+        wrapper.className = "mermaid-wrapper";
+        try {
+          const { svg } = await mermaid.render(`m-${Date.now()}-${index++}`, code.textContent || "");
+          wrapper.innerHTML = svg;
+          const renderedSvg = wrapper.querySelector("svg");
+          if (renderedSvg) {
+            renderedSvg.removeAttribute("width");
+            renderedSvg.removeAttribute("height");
+            renderedSvg.style.maxWidth = "100%";
+            renderedSvg.style.height = "auto";
+          }
+        } catch (err) {
+          wrapper.innerHTML = `<div class="mermaid-error">Mermaid render error\n\n${escapeHtml(String(err))}</div>`;
+        }
+        pre.replaceWith(wrapper);
+      }
+    }
+
+    const nextFrame = () => new Promise((resolve) => requestAnimationFrame(resolve));
+
+    async function render() {
+      try {
+        const safeHtml = DOMPurify.sanitize(marked.parse(editor.value));
+        preview.innerHTML = `<div class="print-page">${safeHtml}</div>`;
+        printPage.innerHTML = safeHtml;
+        await renderMermaidIn(preview);
+        await renderMermaidIn(printPage);
+        await nextFrame();
+        await nextFrame();
+        renderState.textContent = "Rendered";
+      } catch {
+        preview.innerHTML = "<div class='print-page'><p style='color:#c53030;'>Rendering error</p></div>";
+        printPage.innerHTML = "<p style='color:#c53030;'>Rendering error</p>";
+        renderState.textContent = "Render error";
+      }
+    }
+
+    function save() {
+      localStorage.setItem(STORAGE_KEY, editor.value);
+      saveState.textContent = "Saved locally";
+    }
+
+    function renderOutline() {
+      if (!DocumentModel.headings.length) {
+        outlineBody.innerHTML = '<div class="outline-empty">Headings will appear here as you write.</div>';
+        return;
+      }
+      outlineBody.innerHTML = "";
+      for (const heading of DocumentModel.headings) {
+        const button = document.createElement("button");
+        button.className = `outline-item outline-level-${heading.level}`;
+        button.type = "button";
+        button.textContent = heading.text;
+        button.title = `Line ${heading.line}`;
+        button.onclick = () => {
+          editor.focus();
+          editor.setSelectionRange(heading.pos, heading.pos);
+          editor.scrollTop = Math.max(0, (heading.line - 2) * 26);
+          updateCursor();
+        };
+        outlineBody.appendChild(button);
+      }
+    }
+
+    function updateStats() {
+      DocumentModel.analyze(editor.value);
+      wordCount.textContent = `Words: ${DocumentModel.wordCount}`;
+      charCount.textContent = `Characters: ${DocumentModel.charCount}`;
+      lineCount.textContent = `Lines: ${DocumentModel.lineCount}`;
+      renderOutline();
+    }
+
+    function updateCursor() {
+      const before = editor.value.slice(0, editor.selectionStart);
+      const lines = before.split("\n");
+      cursorState.textContent = `Ln ${lines.length}, Col ${lines[lines.length - 1].length + 1}`;
+    }
+
+    function setWrap(on) {
+      UIState.wrapEnabled = on;
+      editor.style.whiteSpace = on ? "pre-wrap" : "pre";
+      editor.style.overflowX = on ? "hidden" : "auto";
+      localStorage.setItem(WRAP_KEY, on ? "on" : "off");
+    }
+
+    function setRibbonTab(name) {
+      if (UIState.activeRibbonTab === name && !UIState.ribbonCollapsed) return toggleRibbonCollapse(true);
+      UIState.activeRibbonTab = name;
+      ribbonTabs.forEach((tab) => tab.classList.toggle("active", tab.dataset.tab === name));
+      ribbonPanels.forEach((panel) => panel.classList.toggle("active", panel.dataset.panel === name));
+      localStorage.setItem(TAB_KEY, name);
+      if (UIState.ribbonCollapsed) toggleRibbonCollapse(false);
+    }
+
+    function toggleRibbonCollapse(force=null) {
+      UIState.ribbonCollapsed = force === null ? !UIState.ribbonCollapsed : force;
+      ribbon.classList.toggle("collapsed", UIState.ribbonCollapsed);
+      ribbonCollapseBtn.querySelector("span:last-child").textContent = UIState.ribbonCollapsed ? "Expand" : "Collapse";
+      ribbonCollapseBtn.querySelector(".icon").textContent = UIState.ribbonCollapsed ? "⌄" : "⌃";
+      localStorage.setItem(RIBBON_KEY, UIState.ribbonCollapsed ? "1" : "0");
+    }
+
+    
+    function updatePaneButtons() {
+      if (editorToggleBtn) {
+        editorToggleBtn.querySelector("span:last-child").textContent = UIState.editorVisible ? "Editor On" : "Editor Off";
+        editorToggleBtn.querySelector(".icon").textContent = UIState.editorVisible ? "✎" : "✕";
+      }
+      if (previewToggleBtn) {
+        previewToggleBtn.querySelector("span:last-child").textContent = UIState.previewVisible ? "Preview On" : "Preview Off";
+        previewToggleBtn.querySelector(".icon").textContent = UIState.previewVisible ? "👁" : "✕";
+      }
+      if (drawerEditorBtn) drawerEditorBtn.textContent = UIState.editorVisible ? "Hide Editor" : "Show Editor";
+      if (drawerPreviewBtn) drawerPreviewBtn.textContent = UIState.previewVisible ? "Hide Preview" : "Show Preview";
+    }
+
+    function setEditorVisible(open) {
+      if (!open && !UIState.previewVisible) return;
+      UIState.editorVisible = open;
+      localStorage.setItem(EDITOR_VISIBLE_KEY, open ? "1" : "0");
+      applyLayout();
+    }
+
+    function setPreviewVisible(open) {
+      if (!open && !UIState.editorVisible) return;
+      UIState.previewVisible = open;
+      localStorage.setItem(PREVIEW_VISIBLE_KEY, open ? "1" : "0");
+      applyLayout();
+    }
+
+    function applyLayout() {
+      const isMobile = window.innerWidth <= 760;
+      const canShowOutline = window.innerWidth > 1020;
+      const showEditor = UIState.editorVisible;
+      const showPreview = UIState.previewVisible;
+      const showOutline = UIState.outlineOpen && canShowOutline;
+
+      workspace.classList.toggle("mobile-layout", isMobile);
+      workspace.classList.toggle("outline-closed", !showOutline);
+      workspace.classList.toggle("mobile-preview", isMobile && UIState.mobilePreview && showPreview);
+
+      outlineSidebar.style.display = showOutline ? "flex" : "none";
+
+      if (isMobile) {
+        workspace.style.gridTemplateColumns = "1fr";
+      } else if (showEditor && showPreview) {
+        workspace.style.gridTemplateColumns = showOutline
+          ? "var(--outline-width) minmax(320px,var(--editor-width)) var(--resizer-width) minmax(320px,1fr)"
+          : "minmax(320px,var(--editor-width)) var(--resizer-width) minmax(320px,1fr)";
+      } else if (showEditor || showPreview) {
+        workspace.style.gridTemplateColumns = showOutline ? "var(--outline-width) 1fr" : "1fr";
+      }
+
+      if (editorPane) {
+        const editorVisibleNow = showEditor && (!isMobile || !UIState.mobilePreview);
+        editorPane.style.display = editorVisibleNow ? "flex" : "none";
+        editorPane.style.gridColumn = "";
+        editorPane.style.flex = "";
+        editorPane.style.maxWidth = "";
+      }
+
+      if (previewPane) {
+        const previewVisibleNow = showPreview && (!isMobile || UIState.mobilePreview);
+        previewPane.style.display = previewVisibleNow ? "flex" : "none";
+        previewPane.style.gridColumn = "";
+        previewPane.style.flex = "";
+        previewPane.style.maxWidth = "";
+      }
+
+      if (!isMobile) {
+        if (showEditor && !showPreview && editorPane) {
+          editorPane.style.gridColumn = showOutline ? "2 / 3" : "1 / 2";
+        }
+        if (!showEditor && showPreview && previewPane) {
+          previewPane.style.gridColumn = showOutline ? "2 / 3" : "1 / 2";
+        }
+      }
+
+      if (resizer) {
+        resizer.style.display = showEditor && showPreview && !isMobile ? "block" : "none";
+      }
+
+      outlineToggleBtn.querySelector("span:last-child").textContent = UIState.outlineOpen ? "Outline On" : "Outline Off";
+      drawerOutlineBtn.textContent = UIState.outlineOpen ? "Hide Outline" : "Show Outline";
+
+      const canUseWriteTab = showEditor;
+      const canUsePreviewTab = showPreview;
+
+      writeTab.classList.toggle("active", canUseWriteTab && (!isMobile || !UIState.mobilePreview || !showPreview));
+      previewTab.classList.toggle("active", canUsePreviewTab && isMobile && UIState.mobilePreview);
+
+      writeTab.disabled = !canUseWriteTab;
+      previewTab.disabled = !canUsePreviewTab;
+
+      if (isMobile) {
+        if (!showEditor && showPreview) {
+          UIState.mobilePreview = true;
+        } else if (showEditor && !showPreview) {
+          UIState.mobilePreview = false;
+        }
+      } else {
+        if (!showEditor && showPreview) {
+          UIState.mobilePreview = true;
+        } else if (showEditor && !showPreview) {
+          UIState.mobilePreview = false;
+        }
+      }
+
+      updatePaneButtons();
+    }
+
+    function setOutlineOpen(open) {
+      UIState.outlineOpen = open;
+      localStorage.setItem(OUTLINE_KEY, open ? "1" : "0");
+      applyLayout();
+    }
+
+    function setTheme(theme) {
+      UIState.theme = theme;
+      document.body.setAttribute("data-theme", theme);
+      localStorage.setItem(THEME_KEY, theme);
+      const dark = theme === "dark";
+      const label = dark ? "Light Mode" : "Dark Mode";
+      themeToggleBtn.textContent = label;
+      drawerThemeBtn.textContent = label;
+      themeRibbonBtn.querySelector("span:last-child").textContent = label;
+      themeRibbonBtn.querySelector(".icon").textContent = dark ? "☀" : "☾";
+    }
+
+    async function toggleTheme() { setTheme(UIState.theme === "dark" ? "light" : "dark"); await render(); }
+    function setPaneWidth(percent) {
+      const clamped = Math.min(78, Math.max(32, percent));
+      UIState.paneWidth = clamped;
+      document.documentElement.style.setProperty("--editor-width", `${clamped}%`);
+      localStorage.setItem(PANE_KEY, String(clamped));
+    }
+
+    async function triggerUpdate(pushHistory=true) {
+      await render();
+      save();
+      updateStats();
+      updateCursor();
+      if (pushHistory) History.push(editor.value, editor.selectionStart, editor.selectionEnd);
+    }
+
+    const History = {
+      stack: [],
+      index: -1,
+      mute: false,
+      push(value, selectionStart=0, selectionEnd=0) {
+        if (this.mute) return;
+        const current = this.stack[this.index];
+        if (current && current.value === value) {
+          current.selectionStart = selectionStart;
+          current.selectionEnd = selectionEnd;
+          return;
+        }
+        if (this.index < this.stack.length - 1) this.stack = this.stack.slice(0, this.index + 1);
+        this.stack.push({ value, selectionStart, selectionEnd });
+        if (this.stack.length > HISTORY_LIMIT) this.stack.shift();
+        this.index = this.stack.length - 1;
+        updateHistoryButtons();
+      },
+      restore(entry) {
+        if (!entry) return;
+        this.mute = true;
+        editor.value = entry.value;
+        editor.focus();
+        editor.setSelectionRange(entry.selectionStart, entry.selectionEnd);
+        this.mute = false;
+        triggerUpdate(false);
+      }
+    };
+
+    function updateHistoryButtons() {
+      if (undoBtn) undoBtn.disabled = History.index <= 0;
+      if (redoBtn) redoBtn.disabled = History.index >= History.stack.length - 1 || History.index < 0;
+    }
+
+    function undoHistory() {
+      if (History.index <= 0) return;
+      History.index -= 1;
+      History.restore(History.stack[History.index]);
+      updateHistoryButtons();
+    }
+
+    function redoHistory() {
+      if (History.index >= History.stack.length - 1) return;
+      History.index += 1;
+      History.restore(History.stack[History.index]);
+      updateHistoryButtons();
+    }
+
+    function getSelectionState() {
+      const value = editor.value;
+      const start = editor.selectionStart;
+      const end = editor.selectionEnd;
+      return {
+        value,
+        start,
+        end,
+        collapsed: start === end,
+        selectedText: value.slice(start, end),
+        before: value.slice(0, start),
+        after: value.slice(end)
+      };
+    }
+
+    function replaceEditorContent(nextValue, nextStart, nextEnd) {
+      editor.value = nextValue;
+      editor.focus();
+      editor.setSelectionRange(nextStart, nextEnd);
+      triggerUpdate();
+    }
+
+    function selectedOrPlaceholder(placeholder="text") {
+      const state = getSelectionState();
+      return state.selectedText || placeholder;
+    }
+
+    function getSelectedLineRange() {
+      const state = getSelectionState();
+      const blockStart = state.value.lastIndexOf("\n", Math.max(0, state.start - 1)) + 1;
+      let blockEnd = state.value.indexOf("\n", state.end);
+      if (blockEnd === -1) blockEnd = state.value.length;
+      const blockText = state.value.slice(blockStart, blockEnd);
+      return {
+        ...state,
+        blockStart,
+        blockEnd,
+        blockText,
+        lines: blockText.split("\n")
+      };
+    }
+
+    function applyInlineWrap(open, close="", placeholder="text") {
+      const state = getSelectionState();
+      const content = state.selectedText || placeholder;
+      const nextValue = state.before + open + content + close + state.after;
+      const nextStart = state.start + open.length;
+      const nextEnd = nextStart + content.length;
+      replaceEditorContent(nextValue, nextStart, nextEnd);
+    }
+
+    function insertText(before, after="", placeholder="") {
+      applyInlineWrap(before, after, placeholder);
+    }
+
+    function insertLine(prefix, placeholder="Text") {
+      const state = getSelectionState();
+      const lineStart = state.value.lastIndexOf("\n", state.start - 1) + 1;
+      const nextValue = state.value.slice(0, lineStart) + prefix + placeholder + state.value.slice(lineStart);
+      replaceEditorContent(nextValue, lineStart + prefix.length, lineStart + prefix.length + placeholder.length);
+    }
+
+    function insertBlock(block) {
+      const state = getSelectionState();
+      const beforeBreak = state.start > 0 && !state.before.endsWith("\n") ? "\n" : "";
+      const afterBreak = state.after && !state.after.startsWith("\n") ? "\n" : "";
+      const insertion = beforeBreak + block.replace(/^\n+|\n+$/g, "") + afterBreak;
+      const nextValue = state.before + insertion + state.after;
+      const caret = state.before.length + insertion.length;
+      replaceEditorContent(nextValue, caret, caret);
+    }
+
+    function transformSelectedLines(transformer) {
+      const range = getSelectedLineRange();
+      const changed = range.lines.map((line, index) => transformer(line, index, range.lines)).join("\n");
+      const nextValue = range.value.slice(0, range.blockStart) + changed + range.value.slice(range.blockEnd);
+      replaceEditorContent(nextValue, range.blockStart, range.blockStart + changed.length);
+    }
+
+    function applyLinePrefix(prefix) {
+      const range = getSelectedLineRange();
+      const allPrefixed = range.lines.every((line) => line.startsWith(prefix));
+      const changed = range.lines.map((line) => {
+        if (allPrefixed) return line.startsWith(prefix) ? line.slice(prefix.length) : line;
+        return line.startsWith(prefix) ? line : prefix + line;
+      }).join("\n");
+      const nextValue = range.value.slice(0, range.blockStart) + changed + range.value.slice(range.blockEnd);
+      replaceEditorContent(nextValue, range.blockStart, range.blockStart + changed.length);
+    }
+
+    function applyHeading(level) {
+      const prefix = "#".repeat(level) + " ";
+      transformSelectedLines((line) => {
+        const clean = line.replace(/^\s*#{1,6}\s+/, "").trim();
+        const alreadyLevel = line.trim().startsWith(prefix.trim());
+        return alreadyLevel ? (clean || `Heading ${level}`) : prefix + (clean || `Heading ${level}`);
+      });
+    }
+
+    function applyChecklist() {
+      transformSelectedLines((line) => {
+        const clean = line.replace(/^- \[( |x|X)\]\s+/, "");
+        return /^- \[( |x|X)\]\s+/.test(line) ? clean : `- [ ] ${clean || "task item"}`;
+      });
+    }
+
+    function applyOrderedList() {
+      const range = getSelectedLineRange();
+      const allOrdered = range.lines.every((line) => /^\d+\.\s+/.test(line));
+      const changed = range.lines.map((line, index) => {
+        const clean = line.replace(/^\d+\.\s+/, "");
+        return allOrdered ? clean : `${index + 1}. ${clean || "list item"}`;
+      }).join("\n");
+      const nextValue = range.value.slice(0, range.blockStart) + changed + range.value.slice(range.blockEnd);
+      replaceEditorContent(nextValue, range.blockStart, range.blockStart + changed.length);
+    }
+
+    function insertLink() {
+      const textValue = selectedOrPlaceholder("link text");
+      const url = prompt("Enter the link URL", "https://example.com");
+      if (url === null) return;
+      insertText("[", `](${url || "https://example.com"})`, textValue);
+    }
+
+    function insertImage() {
+      const alt = selectedOrPlaceholder("image description");
+      const url = prompt("Enter the image URL", "https://example.com/image.jpg");
+      if (url === null) return;
+      insertText("![", `](${url || "https://example.com/image.jpg"})`, alt);
+    }
+
+    function insertTable() {
+      const cols = Math.max(1, parseInt(prompt("Number of columns", "3") || "3", 10) || 3);
+      const rows = Math.max(1, parseInt(prompt("Number of body rows", "2") || "2", 10) || 2);
+      const header = "| " + Array.from({length: cols}, (_, i) => `Column ${i+1}`).join(" | ") + " |";
+      const divider = "| " + Array.from({length: cols}, () => "---").join(" | ") + " |";
+      const body = Array.from({length: rows}, (_, r) => "| " + Array.from({length: cols}, (_, c) => `Value ${r+1}.${c+1}`).join(" | ") + " |").join("\n");
+      insertBlock("\n" + header + "\n" + divider + "\n" + body + "\n");
+    }
+
+    function insertCodeBlock() {
+      const language = prompt("Language for the code block", "js");
+      if (language === null) return;
+      const template = selectedOrPlaceholder("console.log('Hello');");
+      insertBlock(`\n\`\`\`${language || ""}\n${template}\n\`\`\`\n`);
+    }
+
+    function insertMermaid() {
+      const template = `flowchart TD\n  A[Start] --> B{Decision}\n  B -->|Yes| C[Continue]\n  B -->|No| D[Stop]`;
+      insertBlock(`\n\`\`\`mermaid\n${template}\n\`\`\`\n`);
+    }
+
+    function slugify(text="") {
+      return text.toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-");
+    }
+
+    function insertTOC() {
+      DocumentModel.analyze(editor.value);
+      if (!DocumentModel.headings.length) {
+        alert("Add at least one heading first.");
+        return;
+      }
+      const toc = DocumentModel.headings
+        .filter((h) => h.level <= 3)
+        .map((h) => `${"  ".repeat(h.level - 1)}- [${h.text}](#${slugify(h.text)})`)
+        .join("\n");
+      insertBlock("\n## Table of Contents\n\n" + toc + "\n");
+    }
+
+    function findNext() {
+      const query = prompt("Find text", window.__mme_last_find || "");
+      if (!query) return;
+      window.__mme_last_find = query;
+      const value = editor.value;
+      const startFrom = editor.selectionEnd || 0;
+      let index = value.toLowerCase().indexOf(query.toLowerCase(), startFrom);
+      if (index === -1 && startFrom > 0) index = value.toLowerCase().indexOf(query.toLowerCase(), 0);
+      if (index === -1) {
+        saveState.textContent = "No match found";
+        setTimeout(() => saveState.textContent = "Saved locally", 1200);
+        return;
+      }
+      editor.focus();
+      editor.setSelectionRange(index, index + query.length);
+      updateCursor();
+    }
+
+    function replaceText() {
+      const find = prompt("Find text", window.__mme_last_find || "");
+      if (!find) return;
+      const replaceWith = prompt(`Replace "${find}" with`, "");
+      if (replaceWith === null) return;
+      window.__mme_last_find = find;
+      const source = editor.value;
+      const regex = new RegExp(find.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi");
+      const matches = source.match(regex) || [];
+      if (!matches.length) {
+        saveState.textContent = "No match found";
+        setTimeout(() => saveState.textContent = "Saved locally", 1200);
+        return;
+      }
+      replaceEditorValue(source.replace(regex, replaceWith), 0, 0);
+      saveState.textContent = `Replaced ${matches.length} match${matches.length === 1 ? "" : "es"}`;
+      setTimeout(() => saveState.textContent = "Saved locally", 1500);
+    }
+
+    async function copyMarkdown() {
+      try {
+        await navigator.clipboard.writeText(editor.value);
+        saveState.textContent = "Markdown copied";
+      } catch {
+        saveState.textContent = "Clipboard blocked";
+      }
+      setTimeout(() => saveState.textContent = "Saved locally", 1200);
+    }
+
+    function exportHtml() {
+      const documentHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Exported from Mike Markdown Editor (MME) v7.2.2</title>
+<style>
+body{font-family:Segoe UI,Arial,sans-serif;line-height:1.7;max-width:920px;margin:40px auto;padding:0 20px;color:#1f2732}
+pre{background:#1f2530;color:#f4f7fb;padding:16px;border-radius:12px;overflow:auto}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+blockquote{border-left:4px solid #2563eb;padding:.85em 1em;background:#f6f9ff;border-radius:0 10px 10px 0}
+table{width:100%;border-collapse:collapse}th,td{border:1px solid #d8dde6;padding:10px 12px;text-align:left}
+img{max-width:100%;border-radius:12px}
+</style>
+</head>
+<body>
+${DOMPurify.sanitize(marked.parse(editor.value))}
+</body>
+</html>`;
+      const blob = new Blob([documentHtml], { type: "text/html;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `mike-editor-${new Date().toISOString().slice(0,19).replace(/[:T]/g,"-")}.html`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function exportMarkdown() {
+      const blob = new Blob([editor.value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `mike-editor-${new Date().toISOString().slice(0,19).replace(/[:T]/g,"-")}.md`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    async function copyHtml() {
+      try {
+        await navigator.clipboard.writeText(DOMPurify.sanitize(marked.parse(editor.value)));
+        saveState.textContent = "HTML copied";
+      } catch {
+        saveState.textContent = "Clipboard blocked";
+      }
+      setTimeout(() => saveState.textContent = "Saved locally", 1200);
+    }
+
+    async function printPreview() {
+      saveState.textContent = "Preparing print";
+      await render(); await nextFrame(); await nextFrame();
+      setTimeout(() => { window.print(); saveState.textContent = "Saved locally"; }, 180);
+    }
+
+    async function toggleFullscreen() {
+      try {
+        if (!document.fullscreenElement) await document.documentElement.requestFullscreen();
+        else await document.exitFullscreen();
+        updateFullscreenButtons();
+      } catch {
+        saveState.textContent = "Fullscreen blocked";
+        setTimeout(() => saveState.textContent = "Saved locally", 1200);
+      }
+    }
+
+    function updateFullscreenButtons() {
+      const label = document.fullscreenElement ? "Exit Fullscreen" : "Fullscreen";
+      fullscreenBtn.textContent = label;
+      drawerFullscreenBtn.textContent = label;
+      fullscreenRibbonBtn.querySelector("span:last-child").textContent = label;
+    }
+
+    function newDocument() {
+      if (confirm("Clear the current document and start a new one?")) {
+        editor.value = defaultDoc;
+        triggerUpdate();
+      }
+    }
+
+    function openDrawer() {
+      UIState.drawerOpen = true;
+      sideDrawer.classList.add("open");
+      drawerBackdrop.classList.add("open");
+      document.body.classList.add("drawer-open");
+      menuToggleBtn.setAttribute("aria-expanded", "true");
+    }
+    function closeDrawer() {
+      UIState.drawerOpen = false;
+      sideDrawer.classList.remove("open");
+      drawerBackdrop.classList.remove("open");
+      document.body.classList.remove("drawer-open");
+      menuToggleBtn.setAttribute("aria-expanded", "false");
+    }
+
+    function load() {
+      const savedDoc = localStorage.getItem(STORAGE_KEY);
+      editor.value = (savedDoc && savedDoc.trim()) ? savedDoc : defaultDoc;
+      setWrap(localStorage.getItem(WRAP_KEY) !== "off");
+      setTheme(localStorage.getItem(THEME_KEY) || "light");
+      setRibbonTab(localStorage.getItem(TAB_KEY) || "home");
+      toggleRibbonCollapse(localStorage.getItem(RIBBON_KEY) === "1");
+      setPaneWidth(Number(localStorage.getItem(PANE_KEY) || 50));
+      UIState.outlineOpen = localStorage.getItem(OUTLINE_KEY) !== "0";
+      UIState.editorVisible = localStorage.getItem(EDITOR_VISIBLE_KEY) !== "0";
+      UIState.previewVisible = localStorage.getItem(PREVIEW_VISIBLE_KEY) !== "0";
+      if (!UIState.editorVisible && !UIState.previewVisible) UIState.previewVisible = true;
+      applyLayout();
+      render();
+      updateStats();
+      updateCursor();
+      updateFullscreenButtons();
+      History.stack = [];
+      History.index = -1;
+      History.push(editor.value, editor.selectionStart, editor.selectionEnd);
+      updateHistoryButtons();
+    }
+
+    document.querySelectorAll("[data-action]").forEach((btn) => btn.onclick = () => CommandRegistry[btn.dataset.action]?.());
+    document.querySelectorAll("[data-drawer-action]").forEach((btn) => btn.onclick = () => { CommandRegistry[btn.dataset.drawerAction]?.(); closeDrawer(); });
+    ribbonTabs.forEach((tab) => tab.onclick = () => setRibbonTab(tab.dataset.tab));
+
+    document.getElementById("newDocBtn").onclick = newDocument;
+    document.getElementById("exportMdBtn").onclick = exportMarkdown;
+    document.getElementById("copyHtmlBtn").onclick = copyHtml;
+    document.getElementById("copyMdBtn").onclick = copyMarkdown;
+    document.getElementById("printBtn").onclick = printPreview;
+    document.getElementById("insertDateBtn").onclick = () => insertText("", "", new Date().toLocaleDateString(undefined, { year:"numeric", month:"long", day:"numeric" }));
+    document.getElementById("exportRibbonBtn").onclick = exportMarkdown;
+    document.getElementById("copyRibbonBtn").onclick = copyHtml;
+    document.getElementById("copyMdRibbonBtn").onclick = copyMarkdown;
+    document.getElementById("exportHtmlRibbonBtn").onclick = exportHtml;
+    document.getElementById("printRibbonBtn").onclick = printPreview;
+    findBtn.onclick = findNext;
+    replaceBtn.onclick = replaceText;
+    undoBtn.onclick = undoHistory;
+    redoBtn.onclick = redoHistory;
+    themeToggleBtn.onclick = toggleTheme;
+    themeRibbonBtn.onclick = toggleTheme;
+    drawerThemeBtn.onclick = async () => { closeDrawer(); await toggleTheme(); };
+    fullscreenBtn.onclick = toggleFullscreen;
+    fullscreenRibbonBtn.onclick = toggleFullscreen;
+    drawerFullscreenBtn.onclick = async () => { closeDrawer(); await toggleFullscreen(); };
+    outlineToggleBtn.onclick = () => setOutlineOpen(!UIState.outlineOpen);
+    editorToggleBtn.onclick = () => setEditorVisible(!UIState.editorVisible);
+    previewToggleBtn.onclick = () => setPreviewVisible(!UIState.previewVisible);
+    drawerOutlineBtn.onclick = () => { setOutlineOpen(!UIState.outlineOpen); closeDrawer(); };
+    drawerEditorBtn.onclick = () => { setEditorVisible(!UIState.editorVisible); closeDrawer(); };
+    drawerPreviewBtn.onclick = () => { setPreviewVisible(!UIState.previewVisible); closeDrawer(); };
+    sidebarCollapseBtn.onclick = () => setOutlineOpen(false);
+    ribbonCollapseBtn.onclick = () => toggleRibbonCollapse();
+    document.getElementById("panePreset40").onclick = () => setPaneWidth(40);
+    document.getElementById("panePreset50").onclick = () => setPaneWidth(50);
+    document.getElementById("panePreset60").onclick = () => setPaneWidth(60);
+    document.getElementById("panePreset70").onclick = () => setPaneWidth(70);
+    menuToggleBtn.onclick = () => UIState.drawerOpen ? closeDrawer() : openDrawer();
+    drawerCloseBtn.onclick = closeDrawer;
+    drawerBackdrop.onclick = closeDrawer;
+    document.addEventListener("fullscreenchange", updateFullscreenButtons);
+    document.getElementById("drawerNewBtn").onclick = () => { closeDrawer(); newDocument(); };
+    document.getElementById("drawerExportBtn").onclick = () => { closeDrawer(); exportMarkdown(); };
+    document.getElementById("drawerCopyMdBtn").onclick = () => { closeDrawer(); copyMarkdown(); };
+    document.getElementById("drawerCopyHtmlBtn").onclick = () => { closeDrawer(); copyHtml(); };
+    document.getElementById("drawerExportHtmlBtn").onclick = () => { closeDrawer(); exportHtml(); };
+    document.getElementById("drawerPrintBtn").onclick = () => { closeDrawer(); printPreview(); };
+    importFile.onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (evt) => { editor.value = String(evt.target.result || ""); triggerUpdate(); closeDrawer(); };
+      reader.readAsText(file);
+      importFile.value = "";
+    };
+
+    writeTab.onclick = () => { UIState.mobilePreview = false; applyLayout(); };
+    previewTab.onclick = () => { UIState.mobilePreview = true; applyLayout(); };
+    editor.oninput = triggerUpdate;
+    editor.onclick = updateCursor;
+    editor.onkeyup = updateCursor;
+    editor.onselect = updateCursor;
+    editor.onkeydown = (e) => {
+      if (e.key === "Tab") {
+        e.preventDefault();
+        const start = editor.selectionStart, end = editor.selectionEnd, value = editor.value;
+        editor.value = value.slice(0, start) + "  " + value.slice(end);
+        editor.setSelectionRange(start + 2, start + 2);
+        triggerUpdate();
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") { e.preventDefault(); exportMarkdown(); }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "b") { e.preventDefault(); CommandRegistry.bold(); }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "i") { e.preventDefault(); CommandRegistry.italic(); }
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "x") { e.preventDefault(); CommandRegistry.strike(); }
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "c") { e.preventDefault(); CommandRegistry.code(); }
+      if ((e.ctrlKey || e.metaKey) && e.altKey && e.key === "1") { e.preventDefault(); CommandRegistry.h1(); }
+      if ((e.ctrlKey || e.metaKey) && e.altKey && e.key === "2") { e.preventDefault(); CommandRegistry.h2(); }
+      if ((e.ctrlKey || e.metaKey) && e.altKey && e.key === "3") { e.preventDefault(); CommandRegistry.h3(); }
+      if ((e.ctrlKey || e.metaKey) && e.altKey && e.key === "4") { e.preventDefault(); CommandRegistry.h4(); }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "p") { e.preventDefault(); printPreview(); }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "f") { e.preventDefault(); findNext(); }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "h") { e.preventDefault(); replaceText(); }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z" && !e.shiftKey) { e.preventDefault(); undoHistory(); }
+      if (((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "y") || ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "z")) { e.preventDefault(); redoHistory(); }
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "f") { e.preventDefault(); toggleFullscreen(); }
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "d") { e.preventDefault(); toggleTheme(); }
+      if (e.key === "Escape") closeDrawer();
+    };
+
+    let isDragging = false;
+    resizer.onmousedown = () => {
+      if (window.innerWidth <= 900 || !UIState.editorVisible || !UIState.previewVisible) return;
+      isDragging = true;
+      document.body.style.userSelect = "none";
+      document.body.style.cursor = "col-resize";
+    };
+    window.onmousemove = (e) => {
+      if (!isDragging || window.innerWidth <= 900 || !UIState.editorVisible || !UIState.previewVisible) return;
+      const rect = workspace.getBoundingClientRect();
+      setPaneWidth(((e.clientX - rect.left) / rect.width) * 100);
+    };
+    window.onmouseup = () => {
+      isDragging = false;
+      document.body.style.userSelect = "";
+      document.body.style.cursor = "";
+    };
+    window.onresize = () => {
+      if (window.innerWidth > 920) closeDrawer();
+      applyLayout();
+    };
+
+    load();
+
+  </script>
+</body>
+</html>
