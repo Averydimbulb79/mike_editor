@@ -164,7 +164,7 @@
 <div class="topbar-left">
 <div class="app-badge">M</div>
 <div class="brand">
-<div class="brand-title">Mike Markdown Editor (MME) v7</div>
+<div class="brand-title">Mike Markdown Editor (MME) v7.2</div>
 <div class="brand-subtitle">Document-first Markdown Editor with Mermaid Support</div>
 </div>
 </div>
@@ -205,6 +205,7 @@
 </div>
 <div class="ribbon-col">
 <button class="tool-btn" data-action="h3" type="button">Heading 3</button>
+<button class="tool-btn" data-action="h4" type="button">Heading 4</button>
 <button class="tool-btn" data-action="quote" type="button">Quote</button>
 </div>
 </div><div class="ribbon-group-label">Styles</div></div>
@@ -302,7 +303,7 @@
 </aside>
 <section class="pane editor-pane" id="editorPane">
 <div class="pane-header"><div class="pane-title">Editor</div><div class="pane-meta"><span class="kbd">Tab</span> inserts spaces</div></div>
-<div class="editor-wrap"><div class="document-surface"><textarea id="editor" spellcheck="false"></textarea></div></div>
+<div class="editor-wrap"><div class="document-surface"><textarea id="editor" spellcheck="false" placeholder="Start writing in Markdown here..."></textarea></div></div>
 </section>
 <div aria-label="Resize panes" class="resizer" id="resizer"></div>
 <section class="pane preview-pane" id="previewPane">
@@ -311,13 +312,13 @@
 </section>
 </main>
 <footer class="statusbar">
-<div class="status-group"><span>Mike Markdown Editor (MME) v7</span><span id="wordCount">Words: 0</span><span id="charCount">Characters: 0</span><span id="lineCount">Lines: 1</span></div>
+<div class="status-group"><span>Mike Markdown Editor (MME) v7.2</span><span id="wordCount">Words: 0</span><span id="charCount">Characters: 0</span><span id="lineCount">Lines: 1</span></div>
 <div class="status-group"><span id="saveState">Saved locally</span><span id="cursorState">Ln 1, Col 1</span></div>
 </footer>
 </div>
 <div class="drawer-backdrop" id="drawerBackdrop"></div>
 <aside aria-hidden="true" class="side-drawer" id="sideDrawer">
-<div class="drawer-header"><div class="drawer-title">Mike Markdown Editor (MME) v7</div><button class="drawer-btn drawer-close" id="drawerCloseBtn" type="button">✕</button></div>
+<div class="drawer-header"><div class="drawer-title">Mike Markdown Editor (MME) v7.2</div><button class="drawer-btn drawer-close" id="drawerCloseBtn" type="button">✕</button></div>
 <div class="drawer-body">
 <div class="drawer-section"><div class="drawer-section-title">File</div><div class="drawer-section-body">
 <button class="drawer-btn primary" id="drawerNewBtn" type="button">New</button>
@@ -337,6 +338,14 @@
 </div></div>
 <div class="drawer-section"><div class="drawer-section-title">Quick Insert</div><div class="drawer-section-body">
 <button class="drawer-btn" data-drawer-action="h1" type="button">Heading 1</button>
+<button class="drawer-btn" data-drawer-action="h2" type="button">Heading 2</button>
+<button class="drawer-btn" data-drawer-action="h3" type="button">Heading 3</button>
+<button class="drawer-btn" data-drawer-action="h4" type="button">Heading 4</button>
+<button class="drawer-btn" data-drawer-action="strike" type="button">Strike</button>
+<button class="drawer-btn" data-drawer-action="ul" type="button">Bullets</button>
+<button class="drawer-btn" data-drawer-action="ol" type="button">Numbers</button>
+<button class="drawer-btn" data-drawer-action="task" type="button">Tasks</button>
+<button class="drawer-btn" data-drawer-action="quote" type="button">Quote</button>
 <button class="drawer-btn" data-drawer-action="bold" type="button">Bold</button>
 <button class="drawer-btn" data-drawer-action="italic" type="button">Italic</button>
 <button class="drawer-btn" data-drawer-action="link" type="button">Link</button>
@@ -412,7 +421,7 @@
 
     const defaultDoc = `# New Document
 
-Created in **Mike Markdown Editor (MME) v7**
+Created in **Mike Markdown Editor (MME) v7.2**
 
 Document-first Markdown Editor with Mermaid Support.
 
@@ -445,23 +454,24 @@ flowchart TD
     };
 
     const CommandRegistry = {
-      h1: () => toggleHeading(1),
-      h2: () => toggleHeading(2),
-      h3: () => toggleHeading(3),
-      quote: () => toggleLinePrefix("> "),
-      bold: () => insertText("**", "**", "bold text"),
-      italic: () => insertText("*", "*", "italic text"),
-      strike: () => insertText("~~", "~~", "strikethrough"),
-      ul: () => toggleLinePrefix("- "),
-      ol: () => toggleOrderedList(),
-      task: () => toggleLinePrefix("- [ ] "),
+      h1: () => applyHeading(1),
+      h2: () => applyHeading(2),
+      h3: () => applyHeading(3),
+      h4: () => applyHeading(4),
+      quote: () => applyLinePrefix("> "),
+      bold: () => applyInlineWrap("**", "**", "bold text"),
+      italic: () => applyInlineWrap("*", "*", "italic text"),
+      strike: () => applyInlineWrap("~~", "~~", "strikethrough"),
+      ul: () => applyLinePrefix("- "),
+      ol: () => applyOrderedList(),
+      task: () => applyChecklist(),
       hr: () => insertBlock(`\n---\n`),
       ruleBreak: () => insertBlock(`\n<div style="page-break-after: always;"></div>\n`),
       link: () => insertLink(),
       image: () => insertImage(),
       table: () => insertTable(),
       codeblock: () => insertCodeBlock(),
-      code: () => insertText("`", "`", "inline code"),
+      code: () => applyInlineWrap("`", "`", "inline code"),
       mermaid: () => insertMermaid(),
       toc: () => insertTOC()
     };
@@ -721,30 +731,6 @@ flowchart TD
       if (pushHistory) History.push(editor.value, editor.selectionStart, editor.selectionEnd);
     }
 
-    function insertText(before, after="", placeholder="") {
-      const start = editor.selectionStart, end = editor.selectionEnd, value = editor.value;
-      const selected = value.slice(start, end) || placeholder;
-      editor.value = value.slice(0, start) + before + selected + after + value.slice(end);
-      editor.focus();
-      editor.setSelectionRange(start + before.length, start + before.length + selected.length);
-      triggerUpdate();
-    }
-    function insertLine(prefix, placeholder="Text") {
-      const start = editor.selectionStart, value = editor.value, lineStart = value.lastIndexOf("\n", start - 1) + 1;
-      editor.value = value.slice(0, lineStart) + prefix + placeholder + value.slice(lineStart);
-      editor.focus();
-      editor.setSelectionRange(lineStart + prefix.length, lineStart + prefix.length + placeholder.length);
-      triggerUpdate();
-    }
-    function insertBlock(block) {
-      const start = editor.selectionStart, end = editor.selectionEnd, value = editor.value;
-      editor.value = value.slice(0, start) + block + value.slice(end);
-      editor.focus();
-      editor.setSelectionRange(start + block.length, start + block.length);
-      triggerUpdate();
-    }
-
-
     const History = {
       stack: [],
       index: -1,
@@ -793,50 +779,121 @@ flowchart TD
       updateHistoryButtons();
     }
 
-    function replaceEditorValue(nextValue, selectionStart, selectionEnd) {
+    function getSelectionState() {
+      const value = editor.value;
+      const start = editor.selectionStart;
+      const end = editor.selectionEnd;
+      return {
+        value,
+        start,
+        end,
+        collapsed: start === end,
+        selectedText: value.slice(start, end),
+        before: value.slice(0, start),
+        after: value.slice(end)
+      };
+    }
+
+    function replaceEditorContent(nextValue, nextStart, nextEnd) {
       editor.value = nextValue;
       editor.focus();
-      editor.setSelectionRange(selectionStart, selectionEnd);
+      editor.setSelectionRange(nextStart, nextEnd);
       triggerUpdate();
     }
 
     function selectedOrPlaceholder(placeholder="text") {
-      const start = editor.selectionStart;
-      const end = editor.selectionEnd;
-      const selected = editor.value.slice(start, end);
-      return selected || placeholder;
+      const state = getSelectionState();
+      return state.selectedText || placeholder;
+    }
+
+    function getSelectedLineRange() {
+      const state = getSelectionState();
+      const blockStart = state.value.lastIndexOf("\n", Math.max(0, state.start - 1)) + 1;
+      let blockEnd = state.value.indexOf("\n", state.end);
+      if (blockEnd === -1) blockEnd = state.value.length;
+      const blockText = state.value.slice(blockStart, blockEnd);
+      return {
+        ...state,
+        blockStart,
+        blockEnd,
+        blockText,
+        lines: blockText.split("\n")
+      };
+    }
+
+    function applyInlineWrap(open, close="", placeholder="text") {
+      const state = getSelectionState();
+      const content = state.selectedText || placeholder;
+      const nextValue = state.before + open + content + close + state.after;
+      const nextStart = state.start + open.length;
+      const nextEnd = nextStart + content.length;
+      replaceEditorContent(nextValue, nextStart, nextEnd);
+    }
+
+    function insertText(before, after="", placeholder="") {
+      applyInlineWrap(before, after, placeholder);
+    }
+
+    function insertLine(prefix, placeholder="Text") {
+      const state = getSelectionState();
+      const lineStart = state.value.lastIndexOf("\n", state.start - 1) + 1;
+      const nextValue = state.value.slice(0, lineStart) + prefix + placeholder + state.value.slice(lineStart);
+      replaceEditorContent(nextValue, lineStart + prefix.length, lineStart + prefix.length + placeholder.length);
+    }
+
+    function insertBlock(block) {
+      const state = getSelectionState();
+      const beforeBreak = state.start > 0 && !state.before.endsWith("\n") ? "\n" : "";
+      const afterBreak = state.after && !state.after.startsWith("\n") ? "\n" : "";
+      const insertion = beforeBreak + block.replace(/^\n+|\n+$/g, "") + afterBreak;
+      const nextValue = state.before + insertion + state.after;
+      const caret = state.before.length + insertion.length;
+      replaceEditorContent(nextValue, caret, caret);
     }
 
     function transformSelectedLines(transformer) {
-      const value = editor.value;
-      const start = editor.selectionStart;
-      const end = editor.selectionEnd;
-      const blockStart = value.lastIndexOf("\n", Math.max(0, start - 1)) + 1;
-      let blockEnd = value.indexOf("\n", end);
-      if (blockEnd === -1) blockEnd = value.length;
-      const block = value.slice(blockStart, blockEnd);
-      const lines = block.split("\n");
-      const changed = lines.map(transformer).join("\n");
-      replaceEditorValue(value.slice(0, blockStart) + changed + value.slice(blockEnd), blockStart, blockStart + changed.length);
+      const range = getSelectedLineRange();
+      const changed = range.lines.map((line, index) => transformer(line, index, range.lines)).join("\n");
+      const nextValue = range.value.slice(0, range.blockStart) + changed + range.value.slice(range.blockEnd);
+      replaceEditorContent(nextValue, range.blockStart, range.blockStart + changed.length);
     }
 
-    function toggleLinePrefix(prefix) {
-      transformSelectedLines((line) => line.startsWith(prefix) ? line.slice(prefix.length) : prefix + line);
+    function applyLinePrefix(prefix) {
+      const range = getSelectedLineRange();
+      const allPrefixed = range.lines.every((line) => line.startsWith(prefix));
+      const changed = range.lines.map((line) => {
+        if (allPrefixed) return line.startsWith(prefix) ? line.slice(prefix.length) : line;
+        return line.startsWith(prefix) ? line : prefix + line;
+      }).join("\n");
+      const nextValue = range.value.slice(0, range.blockStart) + changed + range.value.slice(range.blockEnd);
+      replaceEditorContent(nextValue, range.blockStart, range.blockStart + changed.length);
     }
 
-    function toggleHeading(level) {
+    function applyHeading(level) {
       const prefix = "#".repeat(level) + " ";
       transformSelectedLines((line) => {
-        const stripped = line.replace(/^\s*#{1,6}\s+/, "");
-        return line.trim().startsWith(prefix.trim()) ? stripped : prefix + (stripped || `Heading ${level}`);
+        const clean = line.replace(/^\s*#{1,6}\s+/, "").trim();
+        const alreadyLevel = line.trim().startsWith(prefix.trim());
+        return alreadyLevel ? (clean || `Heading ${level}`) : prefix + (clean || `Heading ${level}`);
       });
     }
 
-    function toggleOrderedList() {
-      transformSelectedLines((line, idx) => {
-        const clean = line.replace(/^\d+\.\s+/, "");
-        return /^\d+\.\s+/.test(line) ? clean : `1. ${clean || "list item"}`;
+    function applyChecklist() {
+      transformSelectedLines((line) => {
+        const clean = line.replace(/^- \[( |x|X)\]\s+/, "");
+        return /^- \[( |x|X)\]\s+/.test(line) ? clean : `- [ ] ${clean || "task item"}`;
       });
+    }
+
+    function applyOrderedList() {
+      const range = getSelectedLineRange();
+      const allOrdered = range.lines.every((line) => /^\d+\.\s+/.test(line));
+      const changed = range.lines.map((line, index) => {
+        const clean = line.replace(/^\d+\.\s+/, "");
+        return allOrdered ? clean : `${index + 1}. ${clean || "list item"}`;
+      }).join("\n");
+      const nextValue = range.value.slice(0, range.blockStart) + changed + range.value.slice(range.blockEnd);
+      replaceEditorContent(nextValue, range.blockStart, range.blockStart + changed.length);
     }
 
     function insertLink() {
@@ -944,7 +1001,7 @@ flowchart TD
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Exported from Mike Markdown Editor (MME) v7</title>
+<title>Exported from Mike Markdown Editor (MME) v7.2.2</title>
 <style>
 body{font-family:Segoe UI,Arial,sans-serif;line-height:1.7;max-width:920px;margin:40px auto;padding:0 20px;color:#1f2732}
 pre{background:#1f2530;color:#f4f7fb;padding:16px;border-radius:12px;overflow:auto}
@@ -1034,7 +1091,8 @@ ${DOMPurify.sanitize(marked.parse(editor.value))}
     }
 
     function load() {
-      editor.value = localStorage.getItem(STORAGE_KEY) || defaultDoc;
+      const savedDoc = localStorage.getItem(STORAGE_KEY);
+      editor.value = (savedDoc && savedDoc.trim()) ? savedDoc : defaultDoc;
       setWrap(localStorage.getItem(WRAP_KEY) !== "off");
       setTheme(localStorage.getItem(THEME_KEY) || "light");
       setRibbonTab(localStorage.getItem(TAB_KEY) || "home");
@@ -1128,6 +1186,12 @@ ${DOMPurify.sanitize(marked.parse(editor.value))}
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") { e.preventDefault(); exportMarkdown(); }
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "b") { e.preventDefault(); CommandRegistry.bold(); }
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "i") { e.preventDefault(); CommandRegistry.italic(); }
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "x") { e.preventDefault(); CommandRegistry.strike(); }
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "c") { e.preventDefault(); CommandRegistry.code(); }
+      if ((e.ctrlKey || e.metaKey) && e.altKey && e.key === "1") { e.preventDefault(); CommandRegistry.h1(); }
+      if ((e.ctrlKey || e.metaKey) && e.altKey && e.key === "2") { e.preventDefault(); CommandRegistry.h2(); }
+      if ((e.ctrlKey || e.metaKey) && e.altKey && e.key === "3") { e.preventDefault(); CommandRegistry.h3(); }
+      if ((e.ctrlKey || e.metaKey) && e.altKey && e.key === "4") { e.preventDefault(); CommandRegistry.h4(); }
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "p") { e.preventDefault(); printPreview(); }
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "f") { e.preventDefault(); findNext(); }
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "h") { e.preventDefault(); replaceText(); }
