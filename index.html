@@ -164,7 +164,7 @@
 <div class="topbar-left">
 <div class="app-badge">M</div>
 <div class="brand">
-<div class="brand-title">Mike Markdown Editor (MME) v6</div>
+<div class="brand-title">Mike Markdown Editor (MME) v7</div>
 <div class="brand-subtitle">Document-first Markdown Editor with Mermaid Support</div>
 </div>
 </div>
@@ -172,8 +172,9 @@
 <div class="quick-actions">
 <button class="quick-btn primary" id="newDocBtn" type="button">New</button>
 <label class="file-label" for="importFile">Import</label>
-<button class="quick-btn" id="exportMdBtn" type="button">Export</button>
+<button class="quick-btn" id="copyMdBtn" type="button">Copy MD</button>
 <button class="quick-btn" id="copyHtmlBtn" type="button">Copy HTML</button>
+<button class="quick-btn" id="exportMdBtn" type="button">Export</button>
 <button class="quick-btn" id="printBtn" type="button">Print</button>
 <button class="quick-btn" id="themeToggleBtn" type="button">Dark Mode</button>
 <button class="quick-btn" id="fullscreenBtn" type="button">Fullscreen</button>
@@ -194,6 +195,8 @@
 <div class="ribbon-group"><div class="ribbon-group-body">
 <button class="tool-btn large" id="ribbonCollapseBtn" type="button"><span class="icon">⌃</span><span>Collapse</span></button>
 <button class="tool-btn large" id="insertDateBtn" type="button"><span class="icon">📅</span><span>Date</span></button>
+<button class="tool-btn large" id="findBtn" type="button"><span class="icon">⌕</span><span>Find</span></button>
+<button class="tool-btn large" id="replaceBtn" type="button"><span class="icon">⇄</span><span>Replace</span></button>
 </div><div class="ribbon-group-label">Document</div></div>
 <div class="ribbon-group"><div class="ribbon-group-body">
 <div class="ribbon-col">
@@ -218,6 +221,14 @@
 <button class="tool-btn" data-action="hr" type="button">Rule</button>
 </div>
 </div><div class="ribbon-group-label">Paragraph</div></div>
+<div class="ribbon-group"><div class="ribbon-group-body">
+<div class="ribbon-col">
+<button class="tool-btn large" id="undoBtn" type="button"><span class="icon">↶</span><span>Undo</span></button>
+</div>
+<div class="ribbon-col">
+<button class="tool-btn large" id="redoBtn" type="button"><span class="icon">↷</span><span>Redo</span></button>
+</div>
+</div><div class="ribbon-group-label">History</div></div>
 </div>
 </div>
 <div class="ribbon-panel" data-panel="insert">
@@ -225,16 +236,18 @@
 <div class="ribbon-group"><div class="ribbon-group-body">
 <div class="ribbon-col">
 <button class="tool-btn" data-action="link" type="button">Link</button>
-<button class="tool-btn" data-action="image" type="button">Image</button>
+<button class="tool-btn" data-action="image" type="button">Image URL</button>
+<button class="tool-btn" data-action="toc" type="button">TOC</button>
 </div>
 <div class="ribbon-col">
 <button class="tool-btn" data-action="table" type="button">Table</button>
 <button class="tool-btn" data-action="codeblock" type="button">Code Block</button>
+<button class="tool-btn" data-action="mermaid" type="button">Mermaid</button>
 </div>
 </div><div class="ribbon-group-label">Insert</div></div>
 <div class="ribbon-group"><div class="ribbon-group-body">
 <button class="tool-btn large" data-action="code" type="button"><span class="icon">&lt;/&gt;</span><span>Inline Code</span></button>
-<button class="tool-btn large" data-action="mermaid" type="button"><span class="icon">◇</span><span>Mermaid</span></button>
+<button class="tool-btn large" data-action="ruleBreak" type="button"><span class="icon">—</span><span>Page Break</span></button>
 </div><div class="ribbon-group-label">Objects</div></div>
 </div>
 </div>
@@ -262,10 +275,14 @@
 <div class="ribbon-panel" data-panel="export">
 <div class="ribbon-row">
 <div class="ribbon-group"><div class="ribbon-group-body">
-<button class="tool-btn large" id="exportRibbonBtn" type="button"><span class="icon">⇩</span><span>Export MD</span></button>
+<button class="tool-btn large" id="copyMdRibbonBtn" type="button"><span class="icon">⧉</span><span>Copy MD</span></button>
 <button class="tool-btn large" id="copyRibbonBtn" type="button"><span class="icon">⧉</span><span>Copy HTML</span></button>
+</div><div class="ribbon-group-label">Clipboard</div></div>
+<div class="ribbon-group"><div class="ribbon-group-body">
+<button class="tool-btn large" id="exportRibbonBtn" type="button"><span class="icon">⇩</span><span>Export MD</span></button>
+<button class="tool-btn large" id="exportHtmlRibbonBtn" type="button"><span class="icon">⇩</span><span>Export HTML</span></button>
 <button class="tool-btn large" id="printRibbonBtn" type="button"><span class="icon">🖨</span><span>Print</span></button>
-</div><div class="ribbon-group-label">Output</div></div>
+</div><div class="ribbon-group-label">Export</div></div>
 </div>
 </div>
 </section>
@@ -294,19 +311,21 @@
 </section>
 </main>
 <footer class="statusbar">
-<div class="status-group"><span>Mike Markdown Editor (MME) v6</span><span id="wordCount">Words: 0</span><span id="charCount">Characters: 0</span><span id="lineCount">Lines: 1</span></div>
+<div class="status-group"><span>Mike Markdown Editor (MME) v7</span><span id="wordCount">Words: 0</span><span id="charCount">Characters: 0</span><span id="lineCount">Lines: 1</span></div>
 <div class="status-group"><span id="saveState">Saved locally</span><span id="cursorState">Ln 1, Col 1</span></div>
 </footer>
 </div>
 <div class="drawer-backdrop" id="drawerBackdrop"></div>
 <aside aria-hidden="true" class="side-drawer" id="sideDrawer">
-<div class="drawer-header"><div class="drawer-title">Mike Markdown Editor (MME) v6</div><button class="drawer-btn drawer-close" id="drawerCloseBtn" type="button">✕</button></div>
+<div class="drawer-header"><div class="drawer-title">Mike Markdown Editor (MME) v7</div><button class="drawer-btn drawer-close" id="drawerCloseBtn" type="button">✕</button></div>
 <div class="drawer-body">
 <div class="drawer-section"><div class="drawer-section-title">File</div><div class="drawer-section-body">
 <button class="drawer-btn primary" id="drawerNewBtn" type="button">New</button>
 <label class="file-label drawer-btn drawer-file-label" for="importFile">Import</label>
 <button class="drawer-btn" id="drawerExportBtn" type="button">Export</button>
+<button class="drawer-btn" id="drawerCopyMdBtn" type="button">Copy Markdown</button>
 <button class="drawer-btn" id="drawerCopyHtmlBtn" type="button">Copy HTML</button>
+<button class="drawer-btn" id="drawerExportHtmlBtn" type="button">Export HTML</button>
 <button class="drawer-btn" id="drawerPrintBtn" type="button">Print</button>
 </div></div>
 <div class="drawer-section"><div class="drawer-section-title">View</div><div class="drawer-section-body">
@@ -324,6 +343,7 @@
 <button class="drawer-btn" data-drawer-action="table" type="button">Table</button>
 <button class="drawer-btn" data-drawer-action="codeblock" type="button">Code Block</button>
 <button class="drawer-btn" data-drawer-action="mermaid" type="button">Mermaid</button>
+<button class="drawer-btn" data-drawer-action="toc" type="button">TOC</button>
 </div></div>
 </div>
 </aside>
@@ -337,11 +357,13 @@
     const PANE_KEY = "mike_editor_pane_width_v15";
     const EDITOR_VISIBLE_KEY = "mike_editor_editor_visible_v16";
     const PREVIEW_VISIBLE_KEY = "mike_editor_preview_visible_v16";
+    const HISTORY_LIMIT = 200;
 
     const UIState = { activeRibbonTab: "home", ribbonCollapsed: false, drawerOpen: false, fullscreen: false, paneWidth: 50, wrapEnabled: true, outlineOpen: true, theme: "light", mobilePreview: false, editorVisible: true, previewVisible: true };
 
     const editor = document.getElementById("editor");
     const printPage = document.getElementById("printPage");
+    const preview = document.getElementById("preview");
     const workspace = document.getElementById("workspace");
     const editorPane = document.getElementById("editorPane");
     const previewPane = document.getElementById("previewPane");
@@ -378,12 +400,19 @@
     const ribbonCollapseBtn = document.getElementById("ribbonCollapseBtn");
     const writeTab = document.getElementById("writeTab");
     const previewTab = document.getElementById("previewTab");
+    const findBtn = document.getElementById("findBtn");
+    const replaceBtn = document.getElementById("replaceBtn");
+    const undoBtn = document.getElementById("undoBtn");
+    const redoBtn = document.getElementById("redoBtn");
+    const copyMdBtn = document.getElementById("copyMdBtn");
+    const copyMdRibbonBtn = document.getElementById("copyMdRibbonBtn");
+    const exportHtmlRibbonBtn = document.getElementById("exportHtmlRibbonBtn");
 
     mermaid.initialize({ startOnLoad: false, securityLevel: "loose", theme: "default" });
 
     const defaultDoc = `# New Document
 
-Created in **Mike Markdown Editor (MME) v6**
+Created in **Mike Markdown Editor (MME) v7**
 
 Document-first Markdown Editor with Mermaid Support.
 
@@ -416,23 +445,25 @@ flowchart TD
     };
 
     const CommandRegistry = {
-      h1: () => insertLine("# ", "Heading 1"),
-      h2: () => insertLine("## ", "Heading 2"),
-      h3: () => insertLine("### ", "Heading 3"),
-      quote: () => insertLine("> ", "quoted text"),
+      h1: () => toggleHeading(1),
+      h2: () => toggleHeading(2),
+      h3: () => toggleHeading(3),
+      quote: () => toggleLinePrefix("> "),
       bold: () => insertText("**", "**", "bold text"),
       italic: () => insertText("*", "*", "italic text"),
       strike: () => insertText("~~", "~~", "strikethrough"),
-      ul: () => insertLine("- ", "list item"),
-      ol: () => insertLine("1. ", "list item"),
-      task: () => insertLine("- [ ] ", "task item"),
-      hr: () => insertBlock("\n---\n"),
-      link: () => insertText("[", "](https://example.com)", "link text"),
-      image: () => insertText("![", "](https://example.com/image.jpg)", "alt text"),
-      table: () => insertBlock("\n| Column 1 | Column 2 |\n|---|---|\n| Value 1 | Value 2 |\n"),
-      codeblock: () => insertBlock("\n```js\nconsole.log('Hello');\n```\n"),
+      ul: () => toggleLinePrefix("- "),
+      ol: () => toggleOrderedList(),
+      task: () => toggleLinePrefix("- [ ] "),
+      hr: () => insertBlock(`\n---\n`),
+      ruleBreak: () => insertBlock(`\n<div style="page-break-after: always;"></div>\n`),
+      link: () => insertLink(),
+      image: () => insertImage(),
+      table: () => insertTable(),
+      codeblock: () => insertCodeBlock(),
       code: () => insertText("`", "`", "inline code"),
-      mermaid: () => insertBlock("\n```mermaid\nflowchart TD\n  A[Start] --> B{Decision}\n  B -->|Yes| C[Continue]\n  B -->|No| D[Stop]\n```\n")
+      mermaid: () => insertMermaid(),
+      toc: () => insertTOC()
     };
 
     function escapeHtml(text="") {
@@ -467,11 +498,16 @@ flowchart TD
 
     async function render() {
       try {
-        printPage.innerHTML = DOMPurify.sanitize(marked.parse(editor.value));
+        const safeHtml = DOMPurify.sanitize(marked.parse(editor.value));
+        preview.innerHTML = `<div class="print-page">${safeHtml}</div>`;
+        printPage.innerHTML = safeHtml;
+        await renderMermaidIn(preview);
         await renderMermaidIn(printPage);
-        await nextFrame(); await nextFrame();
+        await nextFrame();
+        await nextFrame();
         renderState.textContent = "Rendered";
       } catch {
+        preview.innerHTML = "<div class='print-page'><p style='color:#c53030;'>Rendering error</p></div>";
         printPage.innerHTML = "<p style='color:#c53030;'>Rendering error</p>";
         renderState.textContent = "Render error";
       }
@@ -571,27 +607,51 @@ flowchart TD
     }
 
     function applyLayout() {
-      const isMobile = window.innerWidth <= 900;
+      const isMobile = window.innerWidth <= 760;
       const canShowOutline = window.innerWidth > 1020;
       const showEditor = UIState.editorVisible;
       const showPreview = UIState.previewVisible;
+      const showOutline = UIState.outlineOpen && canShowOutline;
 
       workspace.classList.toggle("mobile-layout", isMobile);
-      workspace.classList.toggle("outline-closed", !UIState.outlineOpen || !canShowOutline);
+      workspace.classList.toggle("outline-closed", !showOutline);
       workspace.classList.toggle("mobile-preview", isMobile && UIState.mobilePreview && showPreview);
 
-      outlineSidebar.style.display = UIState.outlineOpen && canShowOutline ? "flex" : "none";
+      outlineSidebar.style.display = showOutline ? "flex" : "none";
+
+      if (isMobile) {
+        workspace.style.gridTemplateColumns = "1fr";
+      } else if (showEditor && showPreview) {
+        workspace.style.gridTemplateColumns = showOutline
+          ? "var(--outline-width) minmax(320px,var(--editor-width)) var(--resizer-width) minmax(320px,1fr)"
+          : "minmax(320px,var(--editor-width)) var(--resizer-width) minmax(320px,1fr)";
+      } else if (showEditor || showPreview) {
+        workspace.style.gridTemplateColumns = showOutline ? "var(--outline-width) 1fr" : "1fr";
+      }
 
       if (editorPane) {
-        editorPane.style.display = showEditor ? "flex" : "none";
-        editorPane.style.flex = !showPreview ? "1 1 100%" : "";
-        editorPane.style.maxWidth = !showPreview ? "100%" : "";
+        const editorVisibleNow = showEditor && (!isMobile || !UIState.mobilePreview);
+        editorPane.style.display = editorVisibleNow ? "flex" : "none";
+        editorPane.style.gridColumn = "";
+        editorPane.style.flex = "";
+        editorPane.style.maxWidth = "";
       }
 
       if (previewPane) {
-        previewPane.style.display = showPreview ? "flex" : "none";
-        previewPane.style.flex = !showEditor ? "1 1 100%" : "";
-        previewPane.style.maxWidth = !showEditor ? "100%" : "";
+        const previewVisibleNow = showPreview && (!isMobile || UIState.mobilePreview);
+        previewPane.style.display = previewVisibleNow ? "flex" : "none";
+        previewPane.style.gridColumn = "";
+        previewPane.style.flex = "";
+        previewPane.style.maxWidth = "";
+      }
+
+      if (!isMobile) {
+        if (showEditor && !showPreview && editorPane) {
+          editorPane.style.gridColumn = showOutline ? "2 / 3" : "1 / 2";
+        }
+        if (!showEditor && showPreview && previewPane) {
+          previewPane.style.gridColumn = showOutline ? "2 / 3" : "1 / 2";
+        }
       }
 
       if (resizer) {
@@ -600,15 +660,28 @@ flowchart TD
 
       outlineToggleBtn.querySelector("span:last-child").textContent = UIState.outlineOpen ? "Outline On" : "Outline Off";
       drawerOutlineBtn.textContent = UIState.outlineOpen ? "Hide Outline" : "Show Outline";
-      writeTab.classList.toggle("active", !UIState.mobilePreview || !showPreview);
-      previewTab.classList.toggle("active", UIState.mobilePreview && showPreview);
-      writeTab.disabled = !showEditor;
-      previewTab.disabled = !showPreview;
 
-      if (!showEditor && showPreview) {
-        UIState.mobilePreview = true;
-      } else if (showEditor && !showPreview) {
-        UIState.mobilePreview = false;
+      const canUseWriteTab = showEditor;
+      const canUsePreviewTab = showPreview;
+
+      writeTab.classList.toggle("active", canUseWriteTab && (!isMobile || !UIState.mobilePreview || !showPreview));
+      previewTab.classList.toggle("active", canUsePreviewTab && isMobile && UIState.mobilePreview);
+
+      writeTab.disabled = !canUseWriteTab;
+      previewTab.disabled = !canUsePreviewTab;
+
+      if (isMobile) {
+        if (!showEditor && showPreview) {
+          UIState.mobilePreview = true;
+        } else if (showEditor && !showPreview) {
+          UIState.mobilePreview = false;
+        }
+      } else {
+        if (!showEditor && showPreview) {
+          UIState.mobilePreview = true;
+        } else if (showEditor && !showPreview) {
+          UIState.mobilePreview = false;
+        }
       }
 
       updatePaneButtons();
@@ -640,7 +713,13 @@ flowchart TD
       localStorage.setItem(PANE_KEY, String(clamped));
     }
 
-    async function triggerUpdate() { await render(); save(); updateStats(); updateCursor(); }
+    async function triggerUpdate(pushHistory=true) {
+      await render();
+      save();
+      updateStats();
+      updateCursor();
+      if (pushHistory) History.push(editor.value, editor.selectionStart, editor.selectionEnd);
+    }
 
     function insertText(before, after="", placeholder="") {
       const start = editor.selectionStart, end = editor.selectionEnd, value = editor.value;
@@ -663,6 +742,229 @@ flowchart TD
       editor.focus();
       editor.setSelectionRange(start + block.length, start + block.length);
       triggerUpdate();
+    }
+
+
+    const History = {
+      stack: [],
+      index: -1,
+      mute: false,
+      push(value, selectionStart=0, selectionEnd=0) {
+        if (this.mute) return;
+        const current = this.stack[this.index];
+        if (current && current.value === value) {
+          current.selectionStart = selectionStart;
+          current.selectionEnd = selectionEnd;
+          return;
+        }
+        if (this.index < this.stack.length - 1) this.stack = this.stack.slice(0, this.index + 1);
+        this.stack.push({ value, selectionStart, selectionEnd });
+        if (this.stack.length > HISTORY_LIMIT) this.stack.shift();
+        this.index = this.stack.length - 1;
+        updateHistoryButtons();
+      },
+      restore(entry) {
+        if (!entry) return;
+        this.mute = true;
+        editor.value = entry.value;
+        editor.focus();
+        editor.setSelectionRange(entry.selectionStart, entry.selectionEnd);
+        this.mute = false;
+        triggerUpdate(false);
+      }
+    };
+
+    function updateHistoryButtons() {
+      if (undoBtn) undoBtn.disabled = History.index <= 0;
+      if (redoBtn) redoBtn.disabled = History.index >= History.stack.length - 1 || History.index < 0;
+    }
+
+    function undoHistory() {
+      if (History.index <= 0) return;
+      History.index -= 1;
+      History.restore(History.stack[History.index]);
+      updateHistoryButtons();
+    }
+
+    function redoHistory() {
+      if (History.index >= History.stack.length - 1) return;
+      History.index += 1;
+      History.restore(History.stack[History.index]);
+      updateHistoryButtons();
+    }
+
+    function replaceEditorValue(nextValue, selectionStart, selectionEnd) {
+      editor.value = nextValue;
+      editor.focus();
+      editor.setSelectionRange(selectionStart, selectionEnd);
+      triggerUpdate();
+    }
+
+    function selectedOrPlaceholder(placeholder="text") {
+      const start = editor.selectionStart;
+      const end = editor.selectionEnd;
+      const selected = editor.value.slice(start, end);
+      return selected || placeholder;
+    }
+
+    function transformSelectedLines(transformer) {
+      const value = editor.value;
+      const start = editor.selectionStart;
+      const end = editor.selectionEnd;
+      const blockStart = value.lastIndexOf("\n", Math.max(0, start - 1)) + 1;
+      let blockEnd = value.indexOf("\n", end);
+      if (blockEnd === -1) blockEnd = value.length;
+      const block = value.slice(blockStart, blockEnd);
+      const lines = block.split("\n");
+      const changed = lines.map(transformer).join("\n");
+      replaceEditorValue(value.slice(0, blockStart) + changed + value.slice(blockEnd), blockStart, blockStart + changed.length);
+    }
+
+    function toggleLinePrefix(prefix) {
+      transformSelectedLines((line) => line.startsWith(prefix) ? line.slice(prefix.length) : prefix + line);
+    }
+
+    function toggleHeading(level) {
+      const prefix = "#".repeat(level) + " ";
+      transformSelectedLines((line) => {
+        const stripped = line.replace(/^\s*#{1,6}\s+/, "");
+        return line.trim().startsWith(prefix.trim()) ? stripped : prefix + (stripped || `Heading ${level}`);
+      });
+    }
+
+    function toggleOrderedList() {
+      transformSelectedLines((line, idx) => {
+        const clean = line.replace(/^\d+\.\s+/, "");
+        return /^\d+\.\s+/.test(line) ? clean : `1. ${clean || "list item"}`;
+      });
+    }
+
+    function insertLink() {
+      const textValue = selectedOrPlaceholder("link text");
+      const url = prompt("Enter the link URL", "https://example.com");
+      if (url === null) return;
+      insertText("[", `](${url || "https://example.com"})`, textValue);
+    }
+
+    function insertImage() {
+      const alt = selectedOrPlaceholder("image description");
+      const url = prompt("Enter the image URL", "https://example.com/image.jpg");
+      if (url === null) return;
+      insertText("![", `](${url || "https://example.com/image.jpg"})`, alt);
+    }
+
+    function insertTable() {
+      const cols = Math.max(1, parseInt(prompt("Number of columns", "3") || "3", 10) || 3);
+      const rows = Math.max(1, parseInt(prompt("Number of body rows", "2") || "2", 10) || 2);
+      const header = "| " + Array.from({length: cols}, (_, i) => `Column ${i+1}`).join(" | ") + " |";
+      const divider = "| " + Array.from({length: cols}, () => "---").join(" | ") + " |";
+      const body = Array.from({length: rows}, (_, r) => "| " + Array.from({length: cols}, (_, c) => `Value ${r+1}.${c+1}`).join(" | ") + " |").join("\n");
+      insertBlock("\n" + header + "\n" + divider + "\n" + body + "\n");
+    }
+
+    function insertCodeBlock() {
+      const language = prompt("Language for the code block", "js");
+      if (language === null) return;
+      const template = selectedOrPlaceholder("console.log('Hello');");
+      insertBlock(`\n\`\`\`${language || ""}\n${template}\n\`\`\`\n`);
+    }
+
+    function insertMermaid() {
+      const template = `flowchart TD\n  A[Start] --> B{Decision}\n  B -->|Yes| C[Continue]\n  B -->|No| D[Stop]`;
+      insertBlock(`\n\`\`\`mermaid\n${template}\n\`\`\`\n`);
+    }
+
+    function slugify(text="") {
+      return text.toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-");
+    }
+
+    function insertTOC() {
+      DocumentModel.analyze(editor.value);
+      if (!DocumentModel.headings.length) {
+        alert("Add at least one heading first.");
+        return;
+      }
+      const toc = DocumentModel.headings
+        .filter((h) => h.level <= 3)
+        .map((h) => `${"  ".repeat(h.level - 1)}- [${h.text}](#${slugify(h.text)})`)
+        .join("\n");
+      insertBlock("\n## Table of Contents\n\n" + toc + "\n");
+    }
+
+    function findNext() {
+      const query = prompt("Find text", window.__mme_last_find || "");
+      if (!query) return;
+      window.__mme_last_find = query;
+      const value = editor.value;
+      const startFrom = editor.selectionEnd || 0;
+      let index = value.toLowerCase().indexOf(query.toLowerCase(), startFrom);
+      if (index === -1 && startFrom > 0) index = value.toLowerCase().indexOf(query.toLowerCase(), 0);
+      if (index === -1) {
+        saveState.textContent = "No match found";
+        setTimeout(() => saveState.textContent = "Saved locally", 1200);
+        return;
+      }
+      editor.focus();
+      editor.setSelectionRange(index, index + query.length);
+      updateCursor();
+    }
+
+    function replaceText() {
+      const find = prompt("Find text", window.__mme_last_find || "");
+      if (!find) return;
+      const replaceWith = prompt(`Replace "${find}" with`, "");
+      if (replaceWith === null) return;
+      window.__mme_last_find = find;
+      const source = editor.value;
+      const regex = new RegExp(find.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi");
+      const matches = source.match(regex) || [];
+      if (!matches.length) {
+        saveState.textContent = "No match found";
+        setTimeout(() => saveState.textContent = "Saved locally", 1200);
+        return;
+      }
+      replaceEditorValue(source.replace(regex, replaceWith), 0, 0);
+      saveState.textContent = `Replaced ${matches.length} match${matches.length === 1 ? "" : "es"}`;
+      setTimeout(() => saveState.textContent = "Saved locally", 1500);
+    }
+
+    async function copyMarkdown() {
+      try {
+        await navigator.clipboard.writeText(editor.value);
+        saveState.textContent = "Markdown copied";
+      } catch {
+        saveState.textContent = "Clipboard blocked";
+      }
+      setTimeout(() => saveState.textContent = "Saved locally", 1200);
+    }
+
+    function exportHtml() {
+      const documentHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Exported from Mike Markdown Editor (MME) v7</title>
+<style>
+body{font-family:Segoe UI,Arial,sans-serif;line-height:1.7;max-width:920px;margin:40px auto;padding:0 20px;color:#1f2732}
+pre{background:#1f2530;color:#f4f7fb;padding:16px;border-radius:12px;overflow:auto}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+blockquote{border-left:4px solid #2563eb;padding:.85em 1em;background:#f6f9ff;border-radius:0 10px 10px 0}
+table{width:100%;border-collapse:collapse}th,td{border:1px solid #d8dde6;padding:10px 12px;text-align:left}
+img{max-width:100%;border-radius:12px}
+</style>
+</head>
+<body>
+${DOMPurify.sanitize(marked.parse(editor.value))}
+</body>
+</html>`;
+      const blob = new Blob([documentHtml], { type: "text/html;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `mike-editor-${new Date().toISOString().slice(0,19).replace(/[:T]/g,"-")}.html`;
+      a.click();
+      URL.revokeObjectURL(url);
     }
 
     function exportMarkdown() {
@@ -747,6 +1049,10 @@ flowchart TD
       updateStats();
       updateCursor();
       updateFullscreenButtons();
+      History.stack = [];
+      History.index = -1;
+      History.push(editor.value, editor.selectionStart, editor.selectionEnd);
+      updateHistoryButtons();
     }
 
     document.querySelectorAll("[data-action]").forEach((btn) => btn.onclick = () => CommandRegistry[btn.dataset.action]?.());
@@ -756,11 +1062,18 @@ flowchart TD
     document.getElementById("newDocBtn").onclick = newDocument;
     document.getElementById("exportMdBtn").onclick = exportMarkdown;
     document.getElementById("copyHtmlBtn").onclick = copyHtml;
+    document.getElementById("copyMdBtn").onclick = copyMarkdown;
     document.getElementById("printBtn").onclick = printPreview;
     document.getElementById("insertDateBtn").onclick = () => insertText("", "", new Date().toLocaleDateString(undefined, { year:"numeric", month:"long", day:"numeric" }));
     document.getElementById("exportRibbonBtn").onclick = exportMarkdown;
     document.getElementById("copyRibbonBtn").onclick = copyHtml;
+    document.getElementById("copyMdRibbonBtn").onclick = copyMarkdown;
+    document.getElementById("exportHtmlRibbonBtn").onclick = exportHtml;
     document.getElementById("printRibbonBtn").onclick = printPreview;
+    findBtn.onclick = findNext;
+    replaceBtn.onclick = replaceText;
+    undoBtn.onclick = undoHistory;
+    redoBtn.onclick = redoHistory;
     themeToggleBtn.onclick = toggleTheme;
     themeRibbonBtn.onclick = toggleTheme;
     drawerThemeBtn.onclick = async () => { closeDrawer(); await toggleTheme(); };
@@ -785,7 +1098,9 @@ flowchart TD
     document.addEventListener("fullscreenchange", updateFullscreenButtons);
     document.getElementById("drawerNewBtn").onclick = () => { closeDrawer(); newDocument(); };
     document.getElementById("drawerExportBtn").onclick = () => { closeDrawer(); exportMarkdown(); };
+    document.getElementById("drawerCopyMdBtn").onclick = () => { closeDrawer(); copyMarkdown(); };
     document.getElementById("drawerCopyHtmlBtn").onclick = () => { closeDrawer(); copyHtml(); };
+    document.getElementById("drawerExportHtmlBtn").onclick = () => { closeDrawer(); exportHtml(); };
     document.getElementById("drawerPrintBtn").onclick = () => { closeDrawer(); printPreview(); };
     importFile.onchange = (e) => {
       const file = e.target.files[0];
@@ -814,6 +1129,10 @@ flowchart TD
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "b") { e.preventDefault(); CommandRegistry.bold(); }
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "i") { e.preventDefault(); CommandRegistry.italic(); }
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "p") { e.preventDefault(); printPreview(); }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "f") { e.preventDefault(); findNext(); }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "h") { e.preventDefault(); replaceText(); }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z" && !e.shiftKey) { e.preventDefault(); undoHistory(); }
+      if (((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "y") || ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "z")) { e.preventDefault(); redoHistory(); }
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "f") { e.preventDefault(); toggleFullscreen(); }
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "d") { e.preventDefault(); toggleTheme(); }
       if (e.key === "Escape") closeDrawer();
