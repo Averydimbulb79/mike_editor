@@ -396,9 +396,9 @@
 <div class="drawer-section"><div class="drawer-section-title">File</div><div class="drawer-section-body">
 <button class="drawer-btn primary" id="drawerNewBtn" type="button">New</button>
 <label class="file-label drawer-btn drawer-file-label" for="importFile">Import</label>
-<button class="drawer-btn" id="drawerCopyMdBtn" type="button">Copy MD</button>
-<button class="drawer-btn" id="drawerCopyHtmlBtn" type="button">Copy HTML</button>
 <button class="drawer-btn" id="drawerExportBtn" type="button">Export</button>
+<button class="drawer-btn" id="drawerCopyMdBtn" type="button">Copy Markdown</button>
+<button class="drawer-btn" id="drawerCopyHtmlBtn" type="button">Copy HTML</button>
 <button class="drawer-btn" id="drawerPrintBtn" type="button">Print</button>
 </div></div>
 <div class="drawer-section"><div class="drawer-section-title">View</div><div class="drawer-section-body">
@@ -696,17 +696,22 @@ Start writing here.
 
     async function render() {
       try {
-        const safeHtml = DOMPurify.sanitize(marked.parse(editor.value));
-        preview.innerHTML = `<div class="print-page">${safeHtml}</div>`;
+        const parser = (window.marked && typeof marked.parse === "function") ? marked.parse : (s) => `<pre>${escapeHtml(String(s || ""))}</pre>`;
+        const safeHtml = DOMPurify.sanitize(parser(editor.value));
+        preview.innerHTML = "";
+        const livePage = document.createElement("div");
+        livePage.className = "print-page";
+        livePage.innerHTML = safeHtml;
+        preview.appendChild(livePage);
         printPage.innerHTML = safeHtml;
-        await renderMermaidIn(preview);
+        await renderMermaidIn(livePage);
         await renderMermaidIn(printPage);
         await nextFrame();
         await nextFrame();
         renderState.textContent = "Rendered";
-      } catch {
-        preview.innerHTML = "<div class='print-page'><p style='color:#c53030;'>Rendering error</p></div>";
-        printPage.innerHTML = "<p style='color:#c53030;'>Rendering error</p>";
+      } catch (err) {
+        preview.innerHTML = `<div class="print-page"><p style="color:#c53030;">Rendering error</p><pre style="white-space:pre-wrap;">${escapeHtml(String(err))}</pre></div>`;
+        printPage.innerHTML = `<p style="color:#c53030;">Rendering error</p><pre style="white-space:pre-wrap;">${escapeHtml(String(err))}</pre>`;
         renderState.textContent = "Render error";
       }
     }
@@ -954,8 +959,12 @@ Start writing here.
         resizer.style.display = showEditor && showPreview && !isMobile ? "block" : "none";
       }
 
-      outlineToggleBtn.querySelector("span:last-child").textContent = UIState.outlineOpen ? "Outline On" : "Outline Off";
-      drawerOutlineBtn.textContent = UIState.outlineOpen ? "Hide Outline" : "Show Outline";
+      if (outlineToggleBtn) {
+        const outlineLabel = outlineToggleBtn.querySelector("span:last-child");
+        if (outlineLabel) outlineLabel.textContent = UIState.outlineOpen ? "Outline On" : "Outline Off";
+        else outlineToggleBtn.textContent = UIState.outlineOpen ? "Outline On" : "Outline Off";
+      }
+      if (drawerOutlineBtn) drawerOutlineBtn.textContent = UIState.outlineOpen ? "Hide Outline" : "Show Outline";
 
       const canUseWriteTab = showEditor;
       const canUsePreviewTab = showPreview;
@@ -995,10 +1004,15 @@ Start writing here.
       localStorage.setItem(THEME_KEY, theme);
       const dark = theme === "dark";
       const label = dark ? "Light Mode" : "Dark Mode";
-      themeToggleBtn.textContent = label;
-      drawerThemeBtn.textContent = label;
-      themeRibbonBtn.querySelector("span:last-child").textContent = label;
-      themeRibbonBtn.querySelector(".icon").textContent = dark ? "☀" : "☾";
+      if (themeToggleBtn) themeToggleBtn.textContent = label;
+      if (drawerThemeBtn) drawerThemeBtn.textContent = label;
+      if (themeRibbonBtn) {
+        const ribbonLabel = themeRibbonBtn.querySelector("span:last-child");
+        const ribbonIcon = themeRibbonBtn.querySelector(".icon");
+        if (ribbonLabel) ribbonLabel.textContent = label;
+        else themeRibbonBtn.textContent = label;
+        if (ribbonIcon) ribbonIcon.textContent = dark ? "☀" : "☾";
+      }
     }
 
     function setZoom(value) {
@@ -1515,9 +1529,13 @@ ${DOMPurify.sanitize(marked.parse(editor.value))}
 
     function updateFullscreenButtons() {
       const label = document.fullscreenElement ? "Exit Fullscreen" : "Fullscreen";
-      fullscreenBtn.textContent = label;
-      drawerFullscreenBtn.textContent = label;
-      fullscreenRibbonBtn.querySelector("span:last-child").textContent = label;
+      if (fullscreenBtn) fullscreenBtn.textContent = label;
+      if (drawerFullscreenBtn) drawerFullscreenBtn.textContent = label;
+      if (fullscreenRibbonBtn) {
+        const ribbonLabel = fullscreenRibbonBtn.querySelector("span:last-child");
+        if (ribbonLabel) ribbonLabel.textContent = label;
+        else fullscreenRibbonBtn.textContent = label;
+      }
     }
 
     function applyTemplate(template) {
@@ -1619,12 +1637,12 @@ ${DOMPurify.sanitize(marked.parse(editor.value))}
     if (drawerZoomOutBtn) drawerZoomOutBtn.onclick = () => { stepZoom(-1); closeDrawer(); };
     if (drawerDensityBtn) drawerDensityBtn.onclick = () => { setDensity(UIState.density === "compact" ? "comfortable" : "compact"); closeDrawer(); };
     if (drawerResetLayoutBtn) drawerResetLayoutBtn.onclick = () => { resetLayout(); closeDrawer(); };
-    if (drawerOutlineExpandBtn) drawerOutlineExpandBtn.onclick = () => { expandAllOutlineSections(); closeDrawer(); };
-    if (drawerOutlineCollapseBtn) drawerOutlineCollapseBtn.onclick = () => { collapseAllOutlineSections(); closeDrawer(); };
-    if (drawerPane40Btn) drawerPane40Btn.onclick = () => { setEditorWidth("40%"); closeDrawer(); };
-    if (drawerPane50Btn) drawerPane50Btn.onclick = () => { setEditorWidth("50%"); closeDrawer(); };
-    if (drawerPane60Btn) drawerPane60Btn.onclick = () => { setEditorWidth("60%"); closeDrawer(); };
-    if (drawerPane70Btn) drawerPane70Btn.onclick = () => { setEditorWidth("70%"); closeDrawer(); };
+    if (drawerOutlineExpandBtn) drawerOutlineExpandBtn.onclick = () => { expandAllOutline(); closeDrawer(); };
+    if (drawerOutlineCollapseBtn) drawerOutlineCollapseBtn.onclick = () => { collapseAllOutline(); closeDrawer(); };
+    if (drawerPane40Btn) drawerPane40Btn.onclick = () => { setPaneWidth(40); closeDrawer(); };
+    if (drawerPane50Btn) drawerPane50Btn.onclick = () => { setPaneWidth(50); closeDrawer(); };
+    if (drawerPane60Btn) drawerPane60Btn.onclick = () => { setPaneWidth(60); closeDrawer(); };
+    if (drawerPane70Btn) drawerPane70Btn.onclick = () => { setPaneWidth(70); closeDrawer(); };
     sidebarCollapseBtn.onclick = () => setOutlineOpen(false);
     ribbonCollapseBtn.onclick = () => toggleRibbonCollapse();
     document.getElementById("panePreset40").onclick = () => setPaneWidth(40);
