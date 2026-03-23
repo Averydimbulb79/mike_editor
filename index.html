@@ -20,6 +20,17 @@
       --resizer-width: 8px;
       --font-ui: "Segoe UI", Inter, system-ui, sans-serif;
       --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      --doc-zoom: 1;
+      --editor-font-size: calc(16px * var(--doc-zoom));
+      --preview-font-size: calc(16px * var(--doc-zoom));
+    }
+    body[data-density="compact"] {
+      --topbar-h: 52px;
+      --status-h: 36px;
+    }
+    body[data-density="comfortable"] {
+      --topbar-h: 60px;
+      --status-h: 42px;
     }
     body[data-theme="light"] {
       --bg: #eef1f5; --app: #ffffff; --surface: #ffffff; --surface-2: #f7f8fa; --surface-3: #fbfcfe;
@@ -91,6 +102,27 @@
     .outline-empty { font-size: 13px; color: var(--muted); padding: 10px; line-height: 1.5; }
     .outline-item { width: 100%; text-align: left; border: 1px solid transparent; background: transparent; border-radius: 8px; padding: 8px 10px; display: block; margin-bottom: 4px; }
     .outline-level-1 { padding-left: 10px; font-weight: 700; } .outline-level-2 { padding-left: 22px; } .outline-level-3 { padding-left: 34px; } .outline-level-4 { padding-left: 46px; } .outline-level-5 { padding-left: 58px; } .outline-level-6 { padding-left: 70px; }
+    .outline-tree { display: flex; flex-direction: column; gap: 2px; }
+    .outline-node { display: flex; flex-direction: column; gap: 2px; }
+    .outline-row { display: flex; align-items: center; gap: 4px; }
+    .outline-children { display: flex; flex-direction: column; gap: 2px; }
+    .outline-node.collapsed > .outline-children { display: none; }
+    .outline-toggle { width: 24px; min-width: 24px; height: 28px; padding: 0; border-radius: 8px; }
+    .outline-spacer { width: 24px; min-width: 24px; height: 28px; }
+    .outline-item.active { border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); background: var(--accent-soft); color: var(--heading); }
+    .outline-body.compact { padding: 8px; }
+    .zoom-badge { min-width: 54px; text-align: center; font-variant-numeric: tabular-nums; }
+    body[data-density="compact"] .topbar { gap: 10px; padding-left: 12px; padding-right: 12px; }
+    body[data-density="compact"] .quick-btn, body[data-density="compact"] .file-label, body[data-density="compact"] .menu-btn, body[data-density="compact"] .drawer-btn, body[data-density="compact"] .sidebar-btn { height: 34px; min-width: 34px; padding: 0 12px; border-radius: 9px; }
+    body[data-density="compact"] .ribbon-tab { height: 32px; font-size: 12px; }
+    body[data-density="compact"] .ribbon { padding: 8px 10px; }
+    body[data-density="compact"] .ribbon-group-body { padding: 6px; min-height: 64px; }
+    body[data-density="compact"] .tool-btn { height: 28px; font-size: 12px; }
+    body[data-density="compact"] .tool-btn.large { width: 82px; height: 58px; font-size: 10px; }
+    body[data-density="compact"] .sidebar-header, body[data-density="compact"] .pane-header { height: 38px; padding: 0 12px; }
+    body[data-density="compact"] .editor-wrap, body[data-density="compact"] .preview-wrap { padding: 12px 10px; }
+    #editor { font-size: var(--editor-font-size); }
+    .preview, .print-page { font-size: var(--preview-font-size); }
     .editor-wrap, .preview-wrap { min-height: 0; flex: 1 1 auto; overflow: auto; background: var(--bg); }
     .editor-wrap { padding: 26px 18px; }
     .preview-wrap { padding: 26px 18px; }
@@ -158,13 +190,13 @@
     }
   </style>
 <meta content="A document-first Markdown editor designed for clean writing, structured layout, and reliable export. Includes Mermaid diagram support." name="description"/></head>
-<body data-theme="light">
+<body data-theme="light" data-density="comfortable">
 <div class="app">
 <header class="topbar">
 <div class="topbar-left">
 <div class="app-badge">M</div>
 <div class="brand">
-<div class="brand-title">Mike Markdown Editor (MME) v7.3</div>
+<div class="brand-title">Mike Markdown Editor (MME) v7.4</div>
 <div class="brand-subtitle">Document-first Markdown Editor with Mermaid Support</div>
 </div>
 </div>
@@ -271,6 +303,26 @@
 <button class="tool-btn" id="panePreset70" type="button">Editor 70%</button>
 </div>
 </div><div class="ribbon-group-label">Pane Width</div></div>
+<div class="ribbon-group"><div class="ribbon-group-body">
+<div class="ribbon-col">
+<button class="tool-btn" id="zoomOutBtn" type="button">Zoom Out</button>
+<button class="tool-btn" id="zoom100Btn" type="button">100%</button>
+</div>
+<div class="ribbon-col">
+<button class="tool-btn" id="zoomInBtn" type="button">Zoom In</button>
+<button class="tool-btn zoom-badge" id="zoomBadge" type="button">100%</button>
+</div>
+</div><div class="ribbon-group-label">Zoom</div></div>
+<div class="ribbon-group"><div class="ribbon-group-body">
+<div class="ribbon-col">
+<button class="tool-btn" id="outlineExpandBtn" type="button">Expand All</button>
+<button class="tool-btn" id="outlineCollapseBtn" type="button">Collapse All</button>
+</div>
+<div class="ribbon-col">
+<button class="tool-btn" id="densityToggleBtn" type="button">Compact UI</button>
+<button class="tool-btn" id="resetLayoutBtn" type="button">Reset Layout</button>
+</div>
+</div><div class="ribbon-group-label">Layout</div></div>
 </div>
 </div>
 <div class="ribbon-panel" data-panel="export">
@@ -295,7 +347,11 @@
 <aside class="sidebar" id="outlineSidebar">
 <div class="sidebar-header">
 <div class="sidebar-title">Outline</div>
-<button class="sidebar-btn" id="sidebarCollapseBtn" type="button">✕</button>
+<div style="display:flex; align-items:center; gap:6px;">
+<button class="sidebar-btn" id="sidebarExpandAllBtn" type="button" title="Expand all">＋</button>
+<button class="sidebar-btn" id="sidebarCollapseAllBtn" type="button" title="Collapse all">－</button>
+<button class="sidebar-btn" id="sidebarCollapseBtn" type="button" title="Hide outline">✕</button>
+</div>
 </div>
 <div class="outline-body" id="outlineBody">
 <div class="outline-empty">Headings will appear here as you write.</div>
@@ -312,13 +368,13 @@
 </section>
 </main>
 <footer class="statusbar">
-<div class="status-group"><span>Mike Markdown Editor (MME) v7.3</span><span id="wordCount">Words: 0</span><span id="charCount">Characters: 0</span><span id="lineCount">Lines: 1</span></div>
+<div class="status-group"><span>Mike Markdown Editor (MME) v7.4</span><span id="wordCount">Words: 0</span><span id="charCount">Characters: 0</span><span id="lineCount">Lines: 1</span></div>
 <div class="status-group"><span id="saveState">Saved locally</span><span id="cursorState">Ln 1, Col 1</span></div>
 </footer>
 </div>
 <div class="drawer-backdrop" id="drawerBackdrop"></div>
 <aside aria-hidden="true" class="side-drawer" id="sideDrawer">
-<div class="drawer-header"><div class="drawer-title">Mike Markdown Editor (MME) v7.3</div><button class="drawer-btn drawer-close" id="drawerCloseBtn" type="button">✕</button></div>
+<div class="drawer-header"><div class="drawer-title">Mike Markdown Editor (MME) v7.4</div><button class="drawer-btn drawer-close" id="drawerCloseBtn" type="button">✕</button></div>
 <div class="drawer-body">
 <div class="drawer-section"><div class="drawer-section-title">File</div><div class="drawer-section-body">
 <button class="drawer-btn primary" id="drawerNewBtn" type="button">New</button>
@@ -335,6 +391,10 @@
 <button class="drawer-btn" id="drawerOutlineBtn" type="button">Hide Outline</button>
 <button class="drawer-btn" id="drawerEditorBtn" type="button">Hide Editor</button>
 <button class="drawer-btn" id="drawerPreviewBtn" type="button">Hide Preview</button>
+<button class="drawer-btn" id="drawerZoomInBtn" type="button">Zoom In</button>
+<button class="drawer-btn" id="drawerZoomOutBtn" type="button">Zoom Out</button>
+<button class="drawer-btn" id="drawerDensityBtn" type="button">Compact UI</button>
+<button class="drawer-btn" id="drawerResetLayoutBtn" type="button">Reset Layout</button>
 </div></div>
 <div class="drawer-section"><div class="drawer-section-title">Quick Insert</div><div class="drawer-section-body">
 <button class="drawer-btn" data-drawer-action="h1" type="button">Heading 1</button>
@@ -357,18 +417,23 @@
 </div>
 </aside>
 <script>
-    const STORAGE_KEY = "mike_editor_document_v17";
-    const WRAP_KEY = "mike_editor_wrap_v17";
-    const TAB_KEY = "mike_editor_active_tab_v17";
-    const THEME_KEY = "mike_editor_theme_v17";
-    const RIBBON_KEY = "mike_editor_ribbon_collapsed_v17";
-    const OUTLINE_KEY = "mike_editor_outline_open_v17";
-    const PANE_KEY = "mike_editor_pane_width_v17";
-    const EDITOR_VISIBLE_KEY = "mike_editor_editor_visible_v17";
-    const PREVIEW_VISIBLE_KEY = "mike_editor_preview_visible_v17";
+    const STORAGE_KEY = "mike_editor_document_v18";
+    const WRAP_KEY = "mike_editor_wrap_v18";
+    const TAB_KEY = "mike_editor_active_tab_v18";
+    const THEME_KEY = "mike_editor_theme_v18";
+    const RIBBON_KEY = "mike_editor_ribbon_collapsed_v18";
+    const OUTLINE_KEY = "mike_editor_outline_open_v18";
+    const PANE_KEY = "mike_editor_pane_width_v18";
+    const EDITOR_VISIBLE_KEY = "mike_editor_editor_visible_v18";
+    const PREVIEW_VISIBLE_KEY = "mike_editor_preview_visible_v18";
+
+    const ZOOM_KEY = "mike_editor_zoom_v18";
+    const DENSITY_KEY = "mike_editor_density_v18";
+    const OUTLINE_COLLAPSE_KEY = "mike_editor_outline_collapsed_v18";
+
     const HISTORY_LIMIT = 200;
 
-    const UIState = { activeRibbonTab: "home", ribbonCollapsed: false, drawerOpen: false, fullscreen: false, paneWidth: 50, wrapEnabled: true, outlineOpen: true, theme: "light", mobilePreview: false, editorVisible: true, previewVisible: true };
+    const UIState = { activeRibbonTab: "home", ribbonCollapsed: false, drawerOpen: false, fullscreen: false, paneWidth: 50, wrapEnabled: true, outlineOpen: true, theme: "light", mobilePreview: false, editorVisible: true, previewVisible: true, zoom: 1, density: "comfortable", outlineCollapsed: {} };
 
     const editor = document.getElementById("editor");
     const printPage = document.getElementById("printPage");
@@ -400,12 +465,26 @@
     const sideDrawer = document.getElementById("sideDrawer");
     const drawerCloseBtn = document.getElementById("drawerCloseBtn");
     const outlineToggleBtn = document.getElementById("outlineToggleBtn");
+    const zoomOutBtn = document.getElementById("zoomOutBtn");
+    const zoomInBtn = document.getElementById("zoomInBtn");
+    const zoom100Btn = document.getElementById("zoom100Btn");
+    const zoomBadge = document.getElementById("zoomBadge");
+    const densityToggleBtn = document.getElementById("densityToggleBtn");
+    const resetLayoutBtn = document.getElementById("resetLayoutBtn");
+    const outlineExpandBtn = document.getElementById("outlineExpandBtn");
+    const outlineCollapseBtn = document.getElementById("outlineCollapseBtn");
     const drawerOutlineBtn = document.getElementById("drawerOutlineBtn");
+    const drawerZoomInBtn = document.getElementById("drawerZoomInBtn");
+    const drawerZoomOutBtn = document.getElementById("drawerZoomOutBtn");
+    const drawerDensityBtn = document.getElementById("drawerDensityBtn");
+    const drawerResetLayoutBtn = document.getElementById("drawerResetLayoutBtn");
     const editorToggleBtn = document.getElementById("editorToggleBtn");
     const previewToggleBtn = document.getElementById("previewToggleBtn");
     const drawerEditorBtn = document.getElementById("drawerEditorBtn");
     const drawerPreviewBtn = document.getElementById("drawerPreviewBtn");
     const sidebarCollapseBtn = document.getElementById("sidebarCollapseBtn");
+    const sidebarExpandAllBtn = document.getElementById("sidebarExpandAllBtn");
+    const sidebarCollapseAllBtn = document.getElementById("sidebarCollapseAllBtn");
     const ribbonCollapseBtn = document.getElementById("ribbonCollapseBtn");
     const writeTab = document.getElementById("writeTab");
     const previewTab = document.getElementById("previewTab");
@@ -419,21 +498,133 @@
 
     mermaid.initialize({ startOnLoad: false, securityLevel: "loose", theme: "default" });
 
-    const defaultDoc = `# New Document
+    const DEMO_DOC = `# Mike Editor Demo Document
 
-Created in **Mike Markdown Editor (MME) v7.3**
+Welcome to **Mike Editor v7.4**. This demo document showcases the core Markdown features currently supported and gives the outline panel something useful to chew on.
 
-Document-first Markdown Editor with Mermaid Support.
+---
 
-## Mermaid Example
+## 1. Headings and Structure
+
+### 1.1 Level 3 Example
+This is a level 3 heading.
+
+#### 1.1.1 Level 4 Example
+More nesting for outline testing.
+
+##### 1.1.1.1 Level 5 Example
+Still going.
+
+###### 1.1.1.1.1 Level 6 Example
+Maximum heading depth supported.
+
+---
+
+## 2. Lists
+
+### 2.1 Unordered List
+- Item A
+  - Nested A1
+  - Nested A2
+    - Nested A2.1
+- Item B
+
+### 2.2 Ordered List
+1. First
+2. Second
+   1. Second A
+   2. Second B
+3. Third
+
+### 2.3 Task List
+- [ ] Task one
+- [x] Task completed
+- [ ] Task three
+
+---
+
+## 3. Text Formatting
+
+**Bold text**
+
+*Italic text*
+
+~~Strikethrough~~
+
+\`Inline code\`
+
+> Blockquotes also work. Quietly dramatic, like a paragraph wearing a cape.
+
+---
+
+## 4. Links and Images
+
+[OpenAI](https://openai.com)
+
+![Placeholder Image](https://via.placeholder.com/240x120.png?text=Mike+Editor)
+
+---
+
+## 5. Table
+
+| Feature | Status |
+|---|---|
+| Headings | Yes |
+| Lists | Yes |
+| Tables | Yes |
+| Mermaid | Yes |
+| Outline tree | Yes |
+
+---
+
+## 6. Code Block
+
+\`\`\`javascript
+function greet(name) {
+  console.log("Hello " + name);
+}
+
+greet("Mike");
+\`\`\`
+
+---
+
+## 7. Mermaid Diagram
 
 \`\`\`mermaid
 flowchart TD
-  A[Start] --> B{Decision}
-  B -->|Yes| C[Continue]
-  B -->|No| D[Stop]
+    A[Start] --> B{Decision}
+    B -->|Yes| C[Do Something]
+    B -->|No| D[Do Something Else]
+    C --> E[Finish]
+    D --> E
 \`\`\`
+
+---
+
+## 8. Deep Outline Test
+
+### Section A
+#### A1
+##### A1.1
+
+### Section B
+#### B1
+##### B1.1
+###### B1.1.1
+
+---
+
+## 9. Final Section
+
+Use the outline buttons to expand and collapse nested headings. In this file, they should finally stop pretending to be decorative.
 `;
+
+    const BLANK_DOC = `# New Document
+
+Start writing here.
+`;
+    const defaultDoc = DEMO_DOC;
 
     const DocumentModel = {
       source: "", headings: [], wordCount: 0, charCount: 0, lineCount: 0,
@@ -528,26 +719,124 @@ flowchart TD
       saveState.textContent = "Saved locally";
     }
 
+
+    function getCurrentHeadingPos() {
+      const cursor = editor.selectionStart;
+      let activePos = null;
+      for (let i = 0; i < DocumentModel.headings.length; i++) {
+        const current = DocumentModel.headings[i];
+        const next = DocumentModel.headings[i + 1];
+        if (cursor >= current.pos && (!next || cursor < next.pos)) activePos = current.pos;
+      }
+      return activePos;
+    }
+
+    function buildOutlineTree() {
+      const root = [];
+      const stack = [];
+      for (const heading of DocumentModel.headings) {
+        const node = { ...heading, children: [] };
+        while (stack.length && stack[stack.length - 1].level >= node.level) stack.pop();
+        if (stack.length) stack[stack.length - 1].children.push(node);
+        else root.push(node);
+        stack.push(node);
+      }
+      return root;
+    }
+
+    function setOutlineCollapsedMap(map) {
+      UIState.outlineCollapsed = map;
+      localStorage.setItem(OUTLINE_COLLAPSE_KEY, JSON.stringify(map));
+      renderOutline();
+    }
+
+    function toggleOutlineNode(pos) {
+      const next = { ...UIState.outlineCollapsed };
+      next[pos] = !next[pos];
+      setOutlineCollapsedMap(next);
+    }
+
+    function expandAllOutline() {
+      setOutlineCollapsedMap({});
+    }
+
+    function collapseAllOutline() {
+      const collapsed = {};
+      for (const heading of DocumentModel.headings) collapsed[heading.pos] = heading.level > 1;
+      setOutlineCollapsedMap(collapsed);
+    }
+
+    function focusHeading(heading) {
+      editor.focus();
+      editor.setSelectionRange(heading.pos, heading.pos);
+      const lineHeight = parseFloat(getComputedStyle(editor).lineHeight) || 26;
+      editor.scrollTop = Math.max(0, (heading.line - 2) * lineHeight);
+      updateCursor();
+      renderOutline();
+    }
+
+    function renderOutlineNodes(nodes, host, activePos) {
+      for (const node of nodes) {
+        const wrapper = document.createElement("div");
+        wrapper.className = "outline-node";
+        wrapper.dataset.pos = String(node.pos);
+        if (UIState.outlineCollapsed[node.pos]) wrapper.classList.add("collapsed");
+
+        const row = document.createElement("div");
+        row.className = "outline-row";
+
+        if (node.children.length) {
+          const toggle = document.createElement("button");
+          toggle.className = "outline-item outline-toggle";
+          toggle.type = "button";
+          toggle.textContent = UIState.outlineCollapsed[node.pos] ? "▸" : "▾";
+          toggle.title = UIState.outlineCollapsed[node.pos] ? "Expand section" : "Collapse section";
+          toggle.onclick = (e) => {
+            e.stopPropagation();
+            toggleOutlineNode(node.pos);
+          };
+          row.appendChild(toggle);
+        } else {
+          const spacer = document.createElement("div");
+          spacer.className = "outline-spacer";
+          row.appendChild(spacer);
+        }
+
+        const button = document.createElement("button");
+        button.className = `outline-item outline-level-${node.level}`;
+        if (node.pos === activePos) button.classList.add("active");
+        button.type = "button";
+        button.textContent = node.text;
+        button.title = `Line ${node.line}`;
+        button.onclick = () => focusHeading(node);
+        row.appendChild(button);
+
+        wrapper.appendChild(row);
+
+        if (node.children.length) {
+          const children = document.createElement("div");
+          children.className = "outline-children";
+          renderOutlineNodes(node.children, children, activePos);
+          wrapper.appendChild(children);
+        }
+
+        host.appendChild(wrapper);
+      }
+    }
+
     function renderOutline() {
       if (!DocumentModel.headings.length) {
         outlineBody.innerHTML = '<div class="outline-empty">Headings will appear here as you write.</div>';
         return;
       }
       outlineBody.innerHTML = "";
-      for (const heading of DocumentModel.headings) {
-        const button = document.createElement("button");
-        button.className = `outline-item outline-level-${heading.level}`;
-        button.type = "button";
-        button.textContent = heading.text;
-        button.title = `Line ${heading.line}`;
-        button.onclick = () => {
-          editor.focus();
-          editor.setSelectionRange(heading.pos, heading.pos);
-          editor.scrollTop = Math.max(0, (heading.line - 2) * 26);
-          updateCursor();
-        };
-        outlineBody.appendChild(button);
-      }
+      outlineBody.classList.toggle("compact", UIState.density === "compact");
+      const tree = buildOutlineTree();
+      const activePos = getCurrentHeadingPos();
+      const root = document.createElement("div");
+      root.className = "outline-tree";
+      renderOutlineNodes(tree, root, activePos);
+      outlineBody.appendChild(root);
     }
 
     function updateStats() {
@@ -713,6 +1002,46 @@ flowchart TD
       drawerThemeBtn.textContent = label;
       themeRibbonBtn.querySelector("span:last-child").textContent = label;
       themeRibbonBtn.querySelector(".icon").textContent = dark ? "☀" : "☾";
+    }
+
+    function setZoom(value) {
+      const allowed = [0.9, 1, 1.1, 1.25];
+      const nearest = allowed.reduce((best, candidate) => Math.abs(candidate - value) < Math.abs(best - value) ? candidate : best, allowed[0]);
+      UIState.zoom = nearest;
+      document.documentElement.style.setProperty("--doc-zoom", String(nearest));
+      localStorage.setItem(ZOOM_KEY, String(nearest));
+      const label = `${Math.round(nearest * 100)}%`;
+      if (zoomBadge) zoomBadge.textContent = label;
+      if (drawerZoomInBtn) drawerZoomInBtn.textContent = `Zoom In (${label})`;
+      if (drawerZoomOutBtn) drawerZoomOutBtn.textContent = `Zoom Out (${label})`;
+    }
+
+    function stepZoom(delta) {
+      const allowed = [0.9, 1, 1.1, 1.25];
+      const idx = Math.max(0, allowed.indexOf(UIState.zoom));
+      setZoom(allowed[Math.min(allowed.length - 1, Math.max(0, idx + delta))]);
+    }
+
+    function setDensity(mode) {
+      UIState.density = mode === "compact" ? "compact" : "comfortable";
+      document.body.setAttribute("data-density", UIState.density);
+      localStorage.setItem(DENSITY_KEY, UIState.density);
+      const compact = UIState.density === "compact";
+      if (densityToggleBtn) densityToggleBtn.textContent = compact ? "Comfortable UI" : "Compact UI";
+      if (drawerDensityBtn) drawerDensityBtn.textContent = compact ? "Comfortable UI" : "Compact UI";
+      renderOutline();
+    }
+
+    function resetLayout() {
+      setPaneWidth(50);
+      setOutlineOpen(true);
+      setEditorVisible(true);
+      setPreviewVisible(true);
+      setZoom(1);
+      setDensity("comfortable");
+      expandAllOutline();
+      if (window.innerWidth <= 760) UIState.mobilePreview = false;
+      applyLayout();
     }
 
     async function toggleTheme() { setTheme(UIState.theme === "dark" ? "light" : "dark"); await render(); }
@@ -1127,7 +1456,7 @@ flowchart TD
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Exported from Mike Markdown Editor (MME) v7.3.2</title>
+<title>Exported from Mike Markdown Editor (MME) v7.4.2</title>
 <style>
 body{font-family:Segoe UI,Arial,sans-serif;line-height:1.7;max-width:920px;margin:40px auto;padding:0 20px;color:#1f2732}
 pre{background:#1f2530;color:#f4f7fb;padding:16px;border-radius:12px;overflow:auto}
@@ -1194,10 +1523,26 @@ ${DOMPurify.sanitize(marked.parse(editor.value))}
       fullscreenRibbonBtn.querySelector("span:last-child").textContent = label;
     }
 
+    function applyTemplate(template) {
+      editor.value = template;
+      UIState.outlineCollapsed = {};
+      localStorage.removeItem(OUTLINE_COLLAPSE_KEY);
+      triggerUpdate();
+    }
+
     function newDocument() {
-      if (confirm("Clear the current document and start a new one?")) {
-        editor.value = defaultDoc;
-        triggerUpdate();
+      const choice = prompt(
+        "Create a new document. Type DEMO for the full showcase template, BLANK for an empty starter, or CANCEL to keep the current document.",
+        "DEMO"
+      );
+      if (choice === null) return;
+      const normalized = String(choice || "").trim().toUpperCase();
+      if (!normalized) return;
+      if (!confirm("Replace the current document with a new template?")) return;
+      if (normalized === "BLANK") {
+        applyTemplate(BLANK_DOC);
+      } else {
+        applyTemplate(DEMO_DOC);
       }
     }
 
@@ -1224,6 +1569,9 @@ ${DOMPurify.sanitize(marked.parse(editor.value))}
       setRibbonTab(localStorage.getItem(TAB_KEY) || "home");
       toggleRibbonCollapse(localStorage.getItem(RIBBON_KEY) === "1");
       setPaneWidth(Number(localStorage.getItem(PANE_KEY) || 50));
+      setZoom(Number(localStorage.getItem(ZOOM_KEY) || 1));
+      setDensity(localStorage.getItem(DENSITY_KEY) || "comfortable");
+      try { UIState.outlineCollapsed = JSON.parse(localStorage.getItem(OUTLINE_COLLAPSE_KEY) || "{}") || {}; } catch { UIState.outlineCollapsed = {}; }
       UIState.outlineOpen = localStorage.getItem(OUTLINE_KEY) !== "0";
       UIState.editorVisible = localStorage.getItem(EDITOR_VISIBLE_KEY) !== "0";
       UIState.previewVisible = localStorage.getItem(PREVIEW_VISIBLE_KEY) !== "0";
@@ -1270,12 +1618,25 @@ ${DOMPurify.sanitize(marked.parse(editor.value))}
     drawerOutlineBtn.onclick = () => { setOutlineOpen(!UIState.outlineOpen); closeDrawer(); };
     drawerEditorBtn.onclick = () => { setEditorVisible(!UIState.editorVisible); closeDrawer(); };
     drawerPreviewBtn.onclick = () => { setPreviewVisible(!UIState.previewVisible); closeDrawer(); };
+    drawerZoomInBtn.onclick = () => { stepZoom(1); closeDrawer(); };
+    drawerZoomOutBtn.onclick = () => { stepZoom(-1); closeDrawer(); };
+    drawerDensityBtn.onclick = () => { setDensity(UIState.density === "compact" ? "comfortable" : "compact"); closeDrawer(); };
+    drawerResetLayoutBtn.onclick = () => { resetLayout(); closeDrawer(); };
     sidebarCollapseBtn.onclick = () => setOutlineOpen(false);
     ribbonCollapseBtn.onclick = () => toggleRibbonCollapse();
     document.getElementById("panePreset40").onclick = () => setPaneWidth(40);
     document.getElementById("panePreset50").onclick = () => setPaneWidth(50);
     document.getElementById("panePreset60").onclick = () => setPaneWidth(60);
     document.getElementById("panePreset70").onclick = () => setPaneWidth(70);
+    zoomOutBtn.onclick = () => stepZoom(-1);
+    zoomInBtn.onclick = () => stepZoom(1);
+    zoom100Btn.onclick = () => setZoom(1);
+    densityToggleBtn.onclick = () => setDensity(UIState.density === "compact" ? "comfortable" : "compact");
+    resetLayoutBtn.onclick = resetLayout;
+    outlineExpandBtn.onclick = expandAllOutline;
+    outlineCollapseBtn.onclick = collapseAllOutline;
+    sidebarExpandAllBtn.onclick = expandAllOutline;
+    sidebarCollapseAllBtn.onclick = collapseAllOutline;
     menuToggleBtn.onclick = () => UIState.drawerOpen ? closeDrawer() : openDrawer();
     drawerCloseBtn.onclick = closeDrawer;
     drawerBackdrop.onclick = closeDrawer;
@@ -1298,9 +1659,9 @@ ${DOMPurify.sanitize(marked.parse(editor.value))}
     writeTab.onclick = () => { UIState.mobilePreview = false; applyLayout(); };
     previewTab.onclick = () => { UIState.mobilePreview = true; applyLayout(); };
     editor.oninput = triggerUpdate;
-    editor.onclick = updateCursor;
-    editor.onkeyup = updateCursor;
-    editor.onselect = updateCursor;
+    editor.onclick = () => { updateCursor(); renderOutline(); };
+    editor.onkeyup = () => { updateCursor(); renderOutline(); };
+    editor.onselect = () => { updateCursor(); renderOutline(); };
     editor.onkeydown = (e) => {
       if (continueMarkdownList(e)) return;
       if (e.key === "Tab") {
@@ -1326,6 +1687,11 @@ ${DOMPurify.sanitize(marked.parse(editor.value))}
       if (((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "y") || ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "z")) { e.preventDefault(); redoHistory(); }
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "f") { e.preventDefault(); toggleFullscreen(); }
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "d") { e.preventDefault(); toggleTheme(); }
+      if ((e.ctrlKey || e.metaKey) && (e.key === "=" || e.key === "+")) { e.preventDefault(); stepZoom(1); }
+      if ((e.ctrlKey || e.metaKey) && e.key === "-") { e.preventDefault(); stepZoom(-1); }
+      if ((e.ctrlKey || e.metaKey) && e.key === "0") { e.preventDefault(); setZoom(1); }
+      if ((e.ctrlKey || e.metaKey) && e.altKey && e.key === "[") { e.preventDefault(); collapseAllOutline(); }
+      if ((e.ctrlKey || e.metaKey) && e.altKey && e.key === "]") { e.preventDefault(); expandAllOutline(); }
       if (e.key === "Escape") closeDrawer();
     };
 
