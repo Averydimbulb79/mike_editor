@@ -61,7 +61,7 @@
       border: 1px solid var(--line); background: var(--surface); color: var(--text); font: inherit; cursor: pointer; transition: .15s ease;
     }
     .quick-btn,.file-label,.menu-btn,.drawer-btn,.sidebar-btn {
-      height: 38px; min-width: 38px; padding: 0 14px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none;
+      min-height: 38px; min-width: 38px; padding: 0 14px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; line-height: 1.2; white-space: normal; text-align: center;
     }
     .quick-btn:hover,.file-label:hover,.menu-btn:hover,.drawer-btn:hover,.sidebar-btn:hover,.tool-btn:hover,.outline-item:hover,.mobile-switch-btn:hover { background: var(--surface-3); border-color: var(--line-2); }
     .quick-btn.primary,.drawer-btn.primary { background: var(--accent); border-color: var(--accent); color: white; }
@@ -159,15 +159,32 @@
     .preview li,.print-page li { margin: .3em 0; }
     .drawer-backdrop { position: fixed; inset: 0; background: rgba(15,20,26,.35); opacity: 0; pointer-events: none; transition: opacity .22s ease; z-index: 110; backdrop-filter: blur(2px); }
     .drawer-backdrop.open { opacity: 1; pointer-events: auto; }
-    .side-drawer { position: fixed; top: 0; right: 0; width: min(340px,88vw); height: 100dvh; background: color-mix(in srgb, var(--surface) 96%, transparent); border-left: 1px solid var(--line); box-shadow: -12px 0 32px rgba(20,30,50,.14); transform: translateX(100%); transition: transform .24s ease; z-index: 120; display: grid; grid-template-rows: auto 1fr; backdrop-filter: blur(10px); }
+    .side-drawer { position: fixed; top: 0; right: 0; width: min(340px,88vw); height: 100dvh; background: color-mix(in srgb, var(--surface) 96%, transparent); border-left: 1px solid var(--line); box-shadow: -12px 0 32px rgba(20,30,50,.14); transform: translateX(100%); transition: transform .24s ease; z-index: 120; display: grid; grid-template-rows: auto 1fr; backdrop-filter: blur(10px); overflow: hidden; }
     .side-drawer.open { transform: translateX(0); }
     .drawer-header { padding-top: var(--safe-top); min-height: calc(60px + var(--safe-top)); display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-left: 14px; padding-right: 14px; border-bottom: 1px solid var(--line); background: var(--surface-3); }
     .drawer-title { font-size: 15px; font-weight: 700; color: var(--heading); }
     .drawer-close { width: 38px; padding: 0; font-size: 18px; }
-    .drawer-body { overflow: auto; padding: 14px; padding-bottom: calc(14px + var(--safe-bottom)); display: flex; flex-direction: column; gap: 14px; }
+    .drawer-body { min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; padding: 14px; padding-bottom: calc(24px + var(--safe-bottom)); display: flex; flex-direction: column; gap: 14px; }
+    .drawer-body::after { content: ""; display: block; min-height: 2px; }
     .drawer-section { border: 1px solid var(--line); border-radius: 14px; background: linear-gradient(180deg,var(--surface) 0%,var(--panel) 100%); overflow: hidden; }
     .drawer-section-title { padding: 10px 12px; font-size: 12px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; border-bottom: 1px solid var(--line); background: var(--surface-3); }
     .drawer-section-body { padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+
+    @media (max-width: 760px) {
+      .side-drawer { width: min(320px,92vw); }
+      .drawer-header { padding-left: 12px; padding-right: 12px; }
+      .drawer-title { font-size: 13px; line-height: 1.2; }
+      .drawer-body { padding: 12px; padding-bottom: calc(18px + var(--safe-bottom)); gap: 12px; }
+      .drawer-section-title { padding: 8px 10px; font-size: 11px; }
+      .drawer-section-body { padding: 8px; gap: 8px; display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); align-items: stretch; }
+      .drawer-btn,.file-label.drawer-btn {
+        width: 100%; min-width: 0; min-height: 40px; padding: 8px 10px;
+        font-size: 13px; line-height: 1.15; border-radius: 10px;
+        white-space: normal; word-break: break-word;
+      }
+      .drawer-close { width: 36px; min-height: 36px; }
+      .drawer-btn.primary, #drawerPrintBtn { grid-column: 1 / -1; }
+    }
     @media (max-width: 1020px) { .brand-subtitle { display:none; } }
     @media (max-width: 920px) { .quick-actions { display: none; } .menu-btn { display: inline-flex; } }
     @media (max-width: 900px) {
@@ -379,40 +396,14 @@
 <div class="drawer-section"><div class="drawer-section-title">File</div><div class="drawer-section-body">
 <button class="drawer-btn primary" id="drawerNewBtn" type="button">New</button>
 <label class="file-label drawer-btn drawer-file-label" for="importFile">Import</label>
-<button class="drawer-btn" id="drawerExportBtn" type="button">Export</button>
-<button class="drawer-btn" id="drawerCopyMdBtn" type="button">Copy Markdown</button>
+<button class="drawer-btn" id="drawerCopyMdBtn" type="button">Copy MD</button>
 <button class="drawer-btn" id="drawerCopyHtmlBtn" type="button">Copy HTML</button>
-<button class="drawer-btn" id="drawerExportHtmlBtn" type="button">Export HTML</button>
+<button class="drawer-btn" id="drawerExportBtn" type="button">Export</button>
 <button class="drawer-btn" id="drawerPrintBtn" type="button">Print</button>
 </div></div>
 <div class="drawer-section"><div class="drawer-section-title">View</div><div class="drawer-section-body">
 <button class="drawer-btn" id="drawerThemeBtn" type="button">Dark Mode</button>
 <button class="drawer-btn" id="drawerFullscreenBtn" type="button">Fullscreen</button>
-<button class="drawer-btn" id="drawerOutlineBtn" type="button">Hide Outline</button>
-<button class="drawer-btn" id="drawerEditorBtn" type="button">Hide Editor</button>
-<button class="drawer-btn" id="drawerPreviewBtn" type="button">Hide Preview</button>
-<button class="drawer-btn" id="drawerZoomInBtn" type="button">Zoom In</button>
-<button class="drawer-btn" id="drawerZoomOutBtn" type="button">Zoom Out</button>
-<button class="drawer-btn" id="drawerDensityBtn" type="button">Compact UI</button>
-<button class="drawer-btn" id="drawerResetLayoutBtn" type="button">Reset Layout</button>
-</div></div>
-<div class="drawer-section"><div class="drawer-section-title">Quick Insert</div><div class="drawer-section-body">
-<button class="drawer-btn" data-drawer-action="h1" type="button">Heading 1</button>
-<button class="drawer-btn" data-drawer-action="h2" type="button">Heading 2</button>
-<button class="drawer-btn" data-drawer-action="h3" type="button">Heading 3</button>
-<button class="drawer-btn" data-drawer-action="h4" type="button">Heading 4</button>
-<button class="drawer-btn" data-drawer-action="strike" type="button">Strike</button>
-<button class="drawer-btn" data-drawer-action="ul" type="button">Bullets</button>
-<button class="drawer-btn" data-drawer-action="ol" type="button">Numbers</button>
-<button class="drawer-btn" data-drawer-action="task" type="button">Tasks</button>
-<button class="drawer-btn" data-drawer-action="quote" type="button">Quote</button>
-<button class="drawer-btn" data-drawer-action="bold" type="button">Bold</button>
-<button class="drawer-btn" data-drawer-action="italic" type="button">Italic</button>
-<button class="drawer-btn" data-drawer-action="link" type="button">Link</button>
-<button class="drawer-btn" data-drawer-action="table" type="button">Table</button>
-<button class="drawer-btn" data-drawer-action="codeblock" type="button">Code Block</button>
-<button class="drawer-btn" data-drawer-action="mermaid" type="button">Mermaid</button>
-<button class="drawer-btn" data-drawer-action="toc" type="button">TOC</button>
 </div></div>
 </div>
 </aside>
@@ -478,6 +469,12 @@
     const drawerZoomOutBtn = document.getElementById("drawerZoomOutBtn");
     const drawerDensityBtn = document.getElementById("drawerDensityBtn");
     const drawerResetLayoutBtn = document.getElementById("drawerResetLayoutBtn");
+    const drawerOutlineExpandBtn = document.getElementById("drawerOutlineExpandBtn");
+    const drawerOutlineCollapseBtn = document.getElementById("drawerOutlineCollapseBtn");
+    const drawerPane40Btn = document.getElementById("drawerPane40Btn");
+    const drawerPane50Btn = document.getElementById("drawerPane50Btn");
+    const drawerPane60Btn = document.getElementById("drawerPane60Btn");
+    const drawerPane70Btn = document.getElementById("drawerPane70Btn");
     const editorToggleBtn = document.getElementById("editorToggleBtn");
     const previewToggleBtn = document.getElementById("previewToggleBtn");
     const drawerEditorBtn = document.getElementById("drawerEditorBtn");
@@ -1608,20 +1605,26 @@ ${DOMPurify.sanitize(marked.parse(editor.value))}
     redoBtn.onclick = redoHistory;
     themeToggleBtn.onclick = toggleTheme;
     themeRibbonBtn.onclick = toggleTheme;
-    drawerThemeBtn.onclick = async () => { closeDrawer(); await toggleTheme(); };
+    if (drawerThemeBtn) drawerThemeBtn.onclick = async () => { closeDrawer(); await toggleTheme(); };
     fullscreenBtn.onclick = toggleFullscreen;
     fullscreenRibbonBtn.onclick = toggleFullscreen;
-    drawerFullscreenBtn.onclick = async () => { closeDrawer(); await toggleFullscreen(); };
+    if (drawerFullscreenBtn) drawerFullscreenBtn.onclick = async () => { closeDrawer(); await toggleFullscreen(); };
     outlineToggleBtn.onclick = () => setOutlineOpen(!UIState.outlineOpen);
     editorToggleBtn.onclick = () => setEditorVisible(!UIState.editorVisible);
     previewToggleBtn.onclick = () => setPreviewVisible(!UIState.previewVisible);
-    drawerOutlineBtn.onclick = () => { setOutlineOpen(!UIState.outlineOpen); closeDrawer(); };
-    drawerEditorBtn.onclick = () => { setEditorVisible(!UIState.editorVisible); closeDrawer(); };
-    drawerPreviewBtn.onclick = () => { setPreviewVisible(!UIState.previewVisible); closeDrawer(); };
-    drawerZoomInBtn.onclick = () => { stepZoom(1); closeDrawer(); };
-    drawerZoomOutBtn.onclick = () => { stepZoom(-1); closeDrawer(); };
-    drawerDensityBtn.onclick = () => { setDensity(UIState.density === "compact" ? "comfortable" : "compact"); closeDrawer(); };
-    drawerResetLayoutBtn.onclick = () => { resetLayout(); closeDrawer(); };
+    if (drawerOutlineBtn) drawerOutlineBtn.onclick = () => { setOutlineOpen(!UIState.outlineOpen); closeDrawer(); };
+    if (drawerEditorBtn) drawerEditorBtn.onclick = () => { setEditorVisible(!UIState.editorVisible); closeDrawer(); };
+    if (drawerPreviewBtn) drawerPreviewBtn.onclick = () => { setPreviewVisible(!UIState.previewVisible); closeDrawer(); };
+    if (drawerZoomInBtn) drawerZoomInBtn.onclick = () => { stepZoom(1); closeDrawer(); };
+    if (drawerZoomOutBtn) drawerZoomOutBtn.onclick = () => { stepZoom(-1); closeDrawer(); };
+    if (drawerDensityBtn) drawerDensityBtn.onclick = () => { setDensity(UIState.density === "compact" ? "comfortable" : "compact"); closeDrawer(); };
+    if (drawerResetLayoutBtn) drawerResetLayoutBtn.onclick = () => { resetLayout(); closeDrawer(); };
+    if (drawerOutlineExpandBtn) drawerOutlineExpandBtn.onclick = () => { expandAllOutlineSections(); closeDrawer(); };
+    if (drawerOutlineCollapseBtn) drawerOutlineCollapseBtn.onclick = () => { collapseAllOutlineSections(); closeDrawer(); };
+    if (drawerPane40Btn) drawerPane40Btn.onclick = () => { setEditorWidth("40%"); closeDrawer(); };
+    if (drawerPane50Btn) drawerPane50Btn.onclick = () => { setEditorWidth("50%"); closeDrawer(); };
+    if (drawerPane60Btn) drawerPane60Btn.onclick = () => { setEditorWidth("60%"); closeDrawer(); };
+    if (drawerPane70Btn) drawerPane70Btn.onclick = () => { setEditorWidth("70%"); closeDrawer(); };
     sidebarCollapseBtn.onclick = () => setOutlineOpen(false);
     ribbonCollapseBtn.onclick = () => toggleRibbonCollapse();
     document.getElementById("panePreset40").onclick = () => setPaneWidth(40);
@@ -1638,15 +1641,21 @@ ${DOMPurify.sanitize(marked.parse(editor.value))}
     sidebarExpandAllBtn.onclick = expandAllOutline;
     sidebarCollapseAllBtn.onclick = collapseAllOutline;
     menuToggleBtn.onclick = () => UIState.drawerOpen ? closeDrawer() : openDrawer();
-    drawerCloseBtn.onclick = closeDrawer;
+    if (drawerCloseBtn) drawerCloseBtn.onclick = closeDrawer;
     drawerBackdrop.onclick = closeDrawer;
     document.addEventListener("fullscreenchange", updateFullscreenButtons);
-    document.getElementById("drawerNewBtn").onclick = () => { closeDrawer(); newDocument(); };
-    document.getElementById("drawerExportBtn").onclick = () => { closeDrawer(); exportMarkdown(); };
-    document.getElementById("drawerCopyMdBtn").onclick = () => { closeDrawer(); copyMarkdown(); };
-    document.getElementById("drawerCopyHtmlBtn").onclick = () => { closeDrawer(); copyHtml(); };
-    document.getElementById("drawerExportHtmlBtn").onclick = () => { closeDrawer(); exportHtml(); };
-    document.getElementById("drawerPrintBtn").onclick = () => { closeDrawer(); printPreview(); };
+    const drawerNewBtn = document.getElementById("drawerNewBtn");
+    if (drawerNewBtn) drawerNewBtn.onclick = () => { closeDrawer(); newDocument(); };
+    const drawerExportBtn = document.getElementById("drawerExportBtn");
+    if (drawerExportBtn) drawerExportBtn.onclick = () => { closeDrawer(); exportMarkdown(); };
+    const drawerCopyMdBtn = document.getElementById("drawerCopyMdBtn");
+    if (drawerCopyMdBtn) drawerCopyMdBtn.onclick = () => { closeDrawer(); copyMarkdown(); };
+    const drawerCopyHtmlBtn = document.getElementById("drawerCopyHtmlBtn");
+    if (drawerCopyHtmlBtn) drawerCopyHtmlBtn.onclick = () => { closeDrawer(); copyHtml(); };
+    const drawerExportHtmlBtn = document.getElementById("drawerExportHtmlBtn");
+    if (drawerExportHtmlBtn) drawerExportHtmlBtn.onclick = () => { closeDrawer(); exportHtml(); };
+    const drawerPrintBtn = document.getElementById("drawerPrintBtn");
+    if (drawerPrintBtn) drawerPrintBtn.onclick = () => { closeDrawer(); printPreview(); };
     importFile.onchange = (e) => {
       const file = e.target.files[0];
       if (!file) return;
