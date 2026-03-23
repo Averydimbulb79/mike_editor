@@ -164,7 +164,7 @@
 <div class="topbar-left">
 <div class="app-badge">M</div>
 <div class="brand">
-<div class="brand-title">Mike Markdown Editor (MME) v7.2</div>
+<div class="brand-title">Mike Markdown Editor (MME) v7.3</div>
 <div class="brand-subtitle">Document-first Markdown Editor with Mermaid Support</div>
 </div>
 </div>
@@ -312,13 +312,13 @@
 </section>
 </main>
 <footer class="statusbar">
-<div class="status-group"><span>Mike Markdown Editor (MME) v7.2</span><span id="wordCount">Words: 0</span><span id="charCount">Characters: 0</span><span id="lineCount">Lines: 1</span></div>
+<div class="status-group"><span>Mike Markdown Editor (MME) v7.3</span><span id="wordCount">Words: 0</span><span id="charCount">Characters: 0</span><span id="lineCount">Lines: 1</span></div>
 <div class="status-group"><span id="saveState">Saved locally</span><span id="cursorState">Ln 1, Col 1</span></div>
 </footer>
 </div>
 <div class="drawer-backdrop" id="drawerBackdrop"></div>
 <aside aria-hidden="true" class="side-drawer" id="sideDrawer">
-<div class="drawer-header"><div class="drawer-title">Mike Markdown Editor (MME) v7.2</div><button class="drawer-btn drawer-close" id="drawerCloseBtn" type="button">✕</button></div>
+<div class="drawer-header"><div class="drawer-title">Mike Markdown Editor (MME) v7.3</div><button class="drawer-btn drawer-close" id="drawerCloseBtn" type="button">✕</button></div>
 <div class="drawer-body">
 <div class="drawer-section"><div class="drawer-section-title">File</div><div class="drawer-section-body">
 <button class="drawer-btn primary" id="drawerNewBtn" type="button">New</button>
@@ -357,15 +357,15 @@
 </div>
 </aside>
 <script>
-    const STORAGE_KEY = "mike_editor_document_v14";
-    const WRAP_KEY = "mike_editor_wrap_v14";
-    const TAB_KEY = "mike_editor_active_tab_v14";
-    const THEME_KEY = "mike_editor_theme_v14";
-    const RIBBON_KEY = "mike_editor_ribbon_collapsed_v14";
-    const OUTLINE_KEY = "mike_editor_outline_open_v15";
-    const PANE_KEY = "mike_editor_pane_width_v15";
-    const EDITOR_VISIBLE_KEY = "mike_editor_editor_visible_v16";
-    const PREVIEW_VISIBLE_KEY = "mike_editor_preview_visible_v16";
+    const STORAGE_KEY = "mike_editor_document_v17";
+    const WRAP_KEY = "mike_editor_wrap_v17";
+    const TAB_KEY = "mike_editor_active_tab_v17";
+    const THEME_KEY = "mike_editor_theme_v17";
+    const RIBBON_KEY = "mike_editor_ribbon_collapsed_v17";
+    const OUTLINE_KEY = "mike_editor_outline_open_v17";
+    const PANE_KEY = "mike_editor_pane_width_v17";
+    const EDITOR_VISIBLE_KEY = "mike_editor_editor_visible_v17";
+    const PREVIEW_VISIBLE_KEY = "mike_editor_preview_visible_v17";
     const HISTORY_LIMIT = 200;
 
     const UIState = { activeRibbonTab: "home", ribbonCollapsed: false, drawerOpen: false, fullscreen: false, paneWidth: 50, wrapEnabled: true, outlineOpen: true, theme: "light", mobilePreview: false, editorVisible: true, previewVisible: true };
@@ -421,7 +421,7 @@
 
     const defaultDoc = `# New Document
 
-Created in **Mike Markdown Editor (MME) v7.2**
+Created in **Mike Markdown Editor (MME) v7.3**
 
 Document-first Markdown Editor with Mermaid Support.
 
@@ -723,6 +723,19 @@ flowchart TD
       localStorage.setItem(PANE_KEY, String(clamped));
     }
 
+    function replaceEditorValue(nextValue, nextStart=0, nextEnd=0) {
+      editor.value = nextValue;
+      editor.focus();
+      editor.setSelectionRange(nextStart, nextEnd);
+      triggerUpdate();
+    }
+
+    function setSelectionAndScroll(start, end) {
+      editor.focus();
+      editor.setSelectionRange(start, end);
+      updateCursor();
+    }
+
     async function triggerUpdate(pushHistory=true) {
       await render();
       save();
@@ -948,6 +961,119 @@ flowchart TD
       insertBlock("\n## Table of Contents\n\n" + toc + "\n");
     }
 
+    function getCurrentLineInfo() {
+      const value = editor.value;
+      const start = editor.selectionStart;
+      const end = editor.selectionEnd;
+      const lineStart = value.lastIndexOf("\n", Math.max(0, start - 1)) + 1;
+      let lineEnd = value.indexOf("\n", end);
+      if (lineEnd === -1) lineEnd = value.length;
+      const line = value.slice(lineStart, lineEnd);
+      return { value, start, end, lineStart, lineEnd, line };
+    }
+
+    function continueMarkdownList(event) {
+      if (event.key !== "Enter") return false;
+      const { value, start, end, lineStart, lineEnd, line } = getCurrentLineInfo();
+      if (start !== end) return false;
+
+      const unordered = /^(\s*)([-+*])\s+(.*)$/;
+      const ordered = /^(\s*)(\d+)\.\s+(.*)$/;
+      const task = /^(\s*)- \[( |x|X)\]\s+(.*)$/;
+
+      let match = line.match(task);
+      if (match) {
+        event.preventDefault();
+        const indent = match[1];
+        const markerText = match[3];
+        if (!markerText.trim()) {
+          const nextValue = value.slice(0, lineStart) + value.slice(lineEnd + (lineEnd < value.length ? 1 : 0));
+          replaceEditorValue(nextValue, lineStart, lineStart);
+          return true;
+        }
+        const insertion = "\n" + indent + "- [ ] ";
+        const nextValue = value.slice(0, start) + insertion + value.slice(end);
+        const caret = start + insertion.length;
+        replaceEditorValue(nextValue, caret, caret);
+        return true;
+      }
+
+      match = line.match(ordered);
+      if (match) {
+        event.preventDefault();
+        const indent = match[1];
+        const currentNumber = Number(match[2] || 1);
+        const itemText = match[3];
+        if (!itemText.trim()) {
+          const cleanLine = indent;
+          const nextValue = value.slice(0, lineStart) + cleanLine + value.slice(lineEnd);
+          const caret = lineStart + cleanLine.length;
+          replaceEditorValue(nextValue, caret, caret);
+          return true;
+        }
+        const insertion = `\n${indent}${currentNumber + 1}. `;
+        const nextValue = value.slice(0, start) + insertion + value.slice(end);
+        const caret = start + insertion.length;
+        replaceEditorValue(nextValue, caret, caret);
+        return true;
+      }
+
+      match = line.match(unordered);
+      if (match) {
+        event.preventDefault();
+        const indent = match[1];
+        const bullet = match[2];
+        const itemText = match[3];
+        if (!itemText.trim()) {
+          const cleanLine = indent;
+          const nextValue = value.slice(0, lineStart) + cleanLine + value.slice(lineEnd);
+          const caret = lineStart + cleanLine.length;
+          replaceEditorValue(nextValue, caret, caret);
+          return true;
+        }
+        const insertion = `\n${indent}${bullet} `;
+        const nextValue = value.slice(0, start) + insertion + value.slice(end);
+        const caret = start + insertion.length;
+        replaceEditorValue(nextValue, caret, caret);
+        return true;
+      }
+
+      return false;
+    }
+
+    function normalizePastedText(text) {
+      let normalized = text.replace(/\r\n?/g, "\n");
+      if (/^https?:\/\/\S+$/i.test(normalized.trim())) {
+        const url = normalized.trim();
+        return `[${url}](${url})`;
+      }
+
+      const lines = normalized.split("\n");
+      const shouldBulletize = lines.length > 1 && lines.every((line) => {
+        const trimmed = line.trim();
+        if (!trimmed) return true;
+        return !/^([\-+*]|\d+\.|>)/.test(trimmed) && trimmed.length > 0;
+      });
+      if (shouldBulletize) {
+        normalized = lines.map((line) => line.trim() ? `- ${line.trim()}` : "").join("\n");
+      }
+      return normalized;
+    }
+
+    function handleSmartPaste(event) {
+      const clipboard = event.clipboardData;
+      if (!clipboard) return;
+      const text = clipboard.getData("text/plain");
+      if (!text) return;
+      const normalized = normalizePastedText(text);
+      if (normalized === text) return;
+      event.preventDefault();
+      const { value, start, end } = getSelectionState();
+      const nextValue = value.slice(0, start) + normalized + value.slice(end);
+      const caret = start + normalized.length;
+      replaceEditorValue(nextValue, caret, caret);
+    }
+
     function findNext() {
       const query = prompt("Find text", window.__mme_last_find || "");
       if (!query) return;
@@ -1001,7 +1127,7 @@ flowchart TD
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Exported from Mike Markdown Editor (MME) v7.2.2</title>
+<title>Exported from Mike Markdown Editor (MME) v7.3.2</title>
 <style>
 body{font-family:Segoe UI,Arial,sans-serif;line-height:1.7;max-width:920px;margin:40px auto;padding:0 20px;color:#1f2732}
 pre{background:#1f2530;color:#f4f7fb;padding:16px;border-radius:12px;overflow:auto}
@@ -1176,6 +1302,7 @@ ${DOMPurify.sanitize(marked.parse(editor.value))}
     editor.onkeyup = updateCursor;
     editor.onselect = updateCursor;
     editor.onkeydown = (e) => {
+      if (continueMarkdownList(e)) return;
       if (e.key === "Tab") {
         e.preventDefault();
         const start = editor.selectionStart, end = editor.selectionEnd, value = editor.value;
@@ -1201,6 +1328,8 @@ ${DOMPurify.sanitize(marked.parse(editor.value))}
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "d") { e.preventDefault(); toggleTheme(); }
       if (e.key === "Escape") closeDrawer();
     };
+
+    editor.onpaste = handleSmartPaste;
 
     let isDragging = false;
     resizer.onmousedown = () => {
