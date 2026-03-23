@@ -1,6 +1,6 @@
 # Mike Markdown Editor (MME)
 
-Document-first Markdown Editor with Mermaid Support
+Multi-Ribbon Markdown Editor with Mermaid Support
 
 Live Demo  
 https://averydimbulb79.github.io/mike_editor/index.html
@@ -9,206 +9,191 @@ https://averydimbulb79.github.io/mike_editor/index.html
 
 ## Overview
 
-Mike Markdown Editor (MME) is a browser-based Markdown writing environment designed to behave like a structured document editor rather than a raw text editor.
+Mike Markdown Editor (MME) is a browser-based Markdown writing environment designed to behave more like a structured document editor rather than a plain text editor.
 
-It treats Markdown as a document surface:
-cleanly rendered, logically structured, and reliably exportable.
+It focuses on one core principle:
 
----
+Markdown should produce clean, readable, and export-ready documents by default.
 
-## Core Philosophy
+Most Markdown editors fail at this. Common issues include:
 
-Most Markdown editors optimise for writing speed.
+• no page structure  
+• broken formatting on export  
+• poor typography  
+• unreadable layouts  
+• inconsistent rendering  
 
-MME optimises for document quality.
-
-Key principles:
-
-• Document-first, not syntax-first  
-• Predictable layout behaviour  
-• Clean, print-ready output  
-• Structured editing experience  
-• Desktop-grade UX in the browser  
+MME is built to solve these problems from the ground up.
 
 ---
 
 ## Current Version
 
-**v7.2 — Core Formatting Engine**
+v7.4
 
-This version marks the transition from a UI shell to a functional editor engine.
-
-The ribbon is no longer just visual.  
-Core formatting actions are now selection-aware and consistent.
+This version introduces structural maturity in layout control, outline behaviour, and usability.
 
 ---
 
-## What v7.x Represents
+## Key Features
 
-v7 is not a single release.
+### Structured Editing Environment
+• Split editor and preview  
+• Real-time rendering  
+• Clean document layout  
+• Print-friendly output  
 
-It is an **active completion phase** focused on:
+### Multi-Ribbon Interface
+• Desktop-style ribbon layout  
+• Logical grouping of tools  
+• Scalable architecture for future expansion  
 
-• turning the ribbon into a real editing system  
-• stabilising interaction behaviour  
-• ensuring every tool works predictably  
+### Markdown + Extended Support
+• Standard Markdown formatting  
+• Tables, code blocks, links, images  
+• Task lists  
+• Mermaid diagram rendering  
 
-Subsequent iterations (v7.2 → v7.5) will progressively complete core functionality.
+### Outline Panel
+• Auto-generated from headings  
+• Nested hierarchy (H1–H6)  
+• Click-to-jump navigation  
+• Expand all / collapse all  
+• Active section tracking  
 
----
+### View & Layout Controls
+• Adjustable editor width  
+• Zoom controls (in, out, reset)  
+• Light / dark mode  
+• UI density toggle (compact / comfortable)  
+• Reset layout to default  
 
-## Key Features (v7.2)
+### Smart Editing Behaviour
+• Auto-continuation for lists  
+• Smart paste handling  
+• Improved text manipulation reliability  
 
-### Editing Engine
-• Selection-aware formatting system  
-• Consistent command execution model  
-• Reliable caret handling  
-
-### Formatting (Implemented)
-• Bold, Italic, Strikethrough, Inline Code  
-• Headings (H1–H4)  
-• Bullet, Numbered, Checklist lists  
-• Blockquote  
-• Horizontal rule  
-
-### Interface
-• Multi-ribbon toolbar (Home, Insert, View, Export)  
-• Responsive layout (desktop + mobile)  
-• Mobile single-pane switching (Write / Preview)  
-
-### View Controls
-• Toggle Editor / Preview panes  
-• Adjustable pane widths  
-• Outline panel  
-
-### Export & Output
-• Copy Markdown  
-• Copy HTML  
-• Export HTML  
-• Print support  
+### Built-in Demo Template
+• Fully structured sample document  
+• Exercises all supported Markdown features  
+• Allows immediate testing of outline and editor behaviour  
 
 ---
 
 ## What Makes It Different
 
-MME is built around **document integrity**, not just editing.
+MME prioritises **document integrity over raw editing speed**.
 
-Typical Markdown editors suffer from:
+It is designed to behave more like:
 
-• broken print layouts  
-• inconsistent spacing  
-• poor export fidelity  
-• fragmented editing experience  
+• Microsoft Word (structure and layout)  
+• Notion (clean rendering)  
+• Obsidian (Markdown flexibility)  
 
-MME is designed to eliminate these issues at the structural level.
+while remaining:
+
+• lightweight  
+• browser-based  
+• dependency-free  
+
+---
+
+## How It Works
+
+MME runs as a single HTML file.
+
+No installation required.  
+No backend required.  
+No build process required.  
+
+Open the file in any modern browser and start writing.
+
+---
+
+## Controls & Shortcuts
+
+### Zoom
+• Ctrl/Cmd + = → Zoom in  
+• Ctrl/Cmd + - → Zoom out  
+• Ctrl/Cmd + 0 → Reset zoom  
+
+### Outline
+• Ctrl/Cmd + Alt + ] → Expand all  
+• Ctrl/Cmd + Alt + [ → Collapse all  
+
+---
+
+## Version 7.4 Highlights
+
+This version focuses on usability, visibility, and structural clarity.
+
+### Major Improvements
+• Functional outline expansion and collapse  
+• Deep hierarchy support in outline  
+• Layout reset system  
+• Zoom system with persistence  
+• UI density control  
+• Improved keyboard shortcuts  
+
+### Demo Experience Upgrade
+• Default document now showcases all features  
+• Users can immediately test:
+  • outline behaviour  
+  • list handling  
+  • Mermaid rendering  
+  • formatting tools  
 
 ---
 
 ## Roadmap Direction
 
-Development is currently focused on **completing v7.x** before introducing new system layers.
+### v7.x (Stabilisation Phase)
+• Expand toolbar to full document editor capability  
+• Improve insertion tools and formatting controls  
+• Enhance outline filtering and navigation  
+• Strengthen document state management  
 
-### v7.x — Functional Completion Phase (Current)
-
-Goal: Complete core editing capabilities
-
-• Full formatting coverage  
-• Insert tools (tables, code blocks, media)  
-• View and document controls  
-• Export refinement  
-
----
-
-### v8 — Document Intelligence & Navigation
-
-• Dynamic outline sync  
-• Search and replace panel  
-• Section folding  
-• Multi-document tabs  
+### v8 (Next Phase)
+• Real-time WYSIWYG editing (no split view)  
+• True document surface rendering  
+• Drag-and-drop layout elements  
+• Advanced formatting controls  
 
 ---
 
-### v9 — Theme System
+## Philosophy
 
-• Light / Dark / Sepia presets  
-• Typography and spacing control  
-• Custom themes  
+MME is built on a simple idea:
 
----
+Markdown is not just text.  
+It is a document system.
 
-### v10 — Export & Publishing Engine
+And a document should:
 
-• PDF and DOCX export  
-• Print layout system (pages, margins, headers)  
-• Table of contents generation  
-
----
-
-### v11+ — Platform Expansion
-
-• Plugin architecture  
-• Performance optimisation for large documents  
-• Version history and collaboration groundwork  
-• AI-assisted writing layer  
+• look good  
+• behave predictably  
+• export cleanly  
+• scale with complexity  
 
 ---
 
-## About Real-Time WYSIWYG Editing
+## Usage
 
-A true real-time WYSIWYG document surface is planned.
-
-It is intentionally **not implemented yet**.
-
-### Why
-
-Because it requires:
-
-• stable formatting engine  
-• accurate cursor mapping  
-• non-breaking rendering integration  
-• performance safeguards  
-
-Implementing it prematurely would destabilise the editor.
+1. Open the HTML file in your browser  
+2. Start writing or use the demo document  
+3. Use the ribbon to format and insert elements  
+4. Export or print with clean formatting  
 
 ---
 
-### Planned Timeline
+## Status
 
-**After v7.x completion, during v8–v9**
+Active development
 
-Approach:
-
-1. Complete formatting and command system (v7.x)  
-2. Introduce document intelligence (v8)  
-3. Layer real-time rendering on top of a stable system  
+v7.x is focused on stabilising the editor foundation before moving into full WYSIWYG capabilities in v8.
 
 ---
 
-## Technical Notes
+## Author
 
-• Runs entirely in-browser (single HTML file)  
-• No installation, no backend  
-• Designed for portability and simplicity  
-
----
-
-## Project Status
-
-Active development.
-
-The editor has moved beyond layout and into functional capability.
-
-Current focus:
-Making every tool behave correctly before expanding further.
-
----
-
-## Vision
-
-MME aims to become:
-
-A document-first Markdown editor that produces output as clean as it writes.
-
-Or more bluntly:
-
-Markdown, without the usual mess.
+Mike Editor Project
