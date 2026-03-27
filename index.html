@@ -161,6 +161,24 @@
     .drawer-backdrop.open { opacity: 1; pointer-events: auto; }
     .side-drawer { position: fixed; top: 0; right: 0; width: min(340px,88vw); height: 100dvh; background: color-mix(in srgb, var(--surface) 96%, transparent); border-left: 1px solid var(--line); box-shadow: -12px 0 32px rgba(20,30,50,.14); transform: translateX(100%); transition: transform .24s ease; z-index: 120; display: grid; grid-template-rows: auto 1fr; backdrop-filter: blur(10px); overflow: hidden; }
     .side-drawer.open { transform: translateX(0); }
+    .chooser-backdrop { position: fixed; inset: 0; background: rgba(15,20,26,.35); opacity: 0; pointer-events: none; transition: opacity .2s ease; z-index: 130; backdrop-filter: blur(2px); }
+    .chooser-backdrop.open { opacity: 1; pointer-events: auto; }
+    .chooser-modal { position: fixed; inset: 50% auto auto 50%; transform: translate(-50%,-46%) scale(.98); width: min(520px, calc(100vw - 24px)); background: color-mix(in srgb, var(--surface) 97%, transparent); border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 20px 60px rgba(18,28,45,.22); opacity: 0; pointer-events: none; transition: transform .2s ease, opacity .2s ease; z-index: 140; overflow: hidden; }
+    .chooser-modal.open { opacity: 1; pointer-events: auto; transform: translate(-50%,-50%) scale(1); }
+    .chooser-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 18px; border-bottom: 1px solid var(--line); background: var(--surface-3); }
+    .chooser-title { font-size: 16px; font-weight: 800; color: var(--heading); }
+    .chooser-subtitle { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .chooser-close { width: 38px; min-width: 38px; min-height: 38px; }
+    .chooser-body { padding: 16px; display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
+    .chooser-option { min-height: 92px; padding: 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); text-align: left; display: flex; flex-direction: column; justify-content: space-between; gap: 8px; }
+    .chooser-option-title { font-size: 15px; font-weight: 800; color: var(--heading); }
+    .chooser-option-copy { font-size: 12px; color: var(--muted); line-height: 1.35; }
+    .chooser-option:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); background: var(--accent-soft); }
+    @media (max-width: 760px) {
+      .chooser-modal { width: calc(100vw - 16px); }
+      .chooser-body { grid-template-columns: 1fr; }
+      .chooser-option { min-height: 78px; }
+    }
     .drawer-header { padding-top: var(--safe-top); min-height: calc(60px + var(--safe-top)); display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-left: 14px; padding-right: 14px; border-bottom: 1px solid var(--line); background: var(--surface-3); }
     .drawer-title { font-size: 15px; font-weight: 700; color: var(--heading); }
     .drawer-close { width: 38px; padding: 0; font-size: 18px; }
@@ -197,13 +215,18 @@
       .document-surface { width: 100%; }
     }
     @media print {
-      @page { size: auto; margin: 18mm 16mm 18mm 16mm; }
+      @page { size: A4; margin: 16mm 14mm 16mm 14mm; }
       html,body { background: white !important; overflow: visible !important; height: auto !important; margin:0 !important; padding:0 !important; }
       body * { visibility: hidden !important; }
       .app,.workspace,.preview-pane,.preview-wrap,.document-surface,#preview,#preview *,#printPage,#printPage * { visibility: visible !important; }
       .topbar,.ribbon-tabs,.ribbon,.mobile-view-switch,.statusbar,.resizer,.editor-pane,.sidebar,.pane-header,.drawer-backdrop,.side-drawer { display: none !important; }
       .app,.workspace,.preview-pane,.preview-wrap,.document-surface,#preview { display:block !important; width:100% !important; max-width:none !important; height:auto !important; overflow:visible !important; margin:0 !important; padding:0 !important; border:none !important; box-shadow:none !important; background:white !important; }
-      #printPage { display:block !important; width:100% !important; max-width:none !important; margin:0 auto !important; padding:8mm 10mm 10mm 10mm !important; background:white !important; color:black !important; }
+      #printPage { display:block !important; width:100% !important; max-width:none !important; margin:0 auto !important; padding:0 !important; background:white !important; color:black !important; font-size:11pt !important; line-height:1.5 !important; }
+      #printPage h1,#printPage h2,#printPage h3,#printPage h4,#printPage h5,#printPage h6 { break-after: avoid-page; page-break-after: avoid; break-inside: avoid; }
+      #printPage p,#printPage blockquote,#printPage ul,#printPage ol,#printPage table,#printPage pre,#printPage img { break-inside: avoid; page-break-inside: avoid; }
+      #printPage hr { break-after: avoid-page; }
+      #printPage table { font-size: 10pt; }
+      #printPage pre { white-space: pre-wrap; word-break: break-word; }
     }
   </style>
 <meta content="A document-first Markdown editor designed for clean writing, structured layout, and reliable export. Includes Mermaid diagram support." name="description"/></head>
@@ -213,7 +236,7 @@
 <div class="topbar-left">
 <div class="app-badge">M</div>
 <div class="brand">
-<div class="brand-title">Mike Markdown Editor (MME) v7.4</div>
+<div class="brand-title">Mike Markdown Editor (MME) v7.5</div>
 <div class="brand-subtitle">Document-first Markdown Editor with Mermaid Support</div>
 </div>
 </div>
@@ -349,8 +372,8 @@
 <button class="tool-btn large" id="copyRibbonBtn" type="button"><span class="icon">⧉</span><span>Copy HTML</span></button>
 </div><div class="ribbon-group-label">Clipboard</div></div>
 <div class="ribbon-group"><div class="ribbon-group-body">
-<button class="tool-btn large" id="exportRibbonBtn" type="button"><span class="icon">⇩</span><span>Export MD</span></button>
-<button class="tool-btn large" id="exportHtmlRibbonBtn" type="button"><span class="icon">⇩</span><span>Export HTML</span></button>
+<button class="tool-btn large" id="exportRibbonBtn" type="button"><span class="icon">⇩</span><span>Export Preset</span></button>
+<button class="tool-btn large" id="exportHtmlRibbonBtn" type="button"><span class="icon">⇩</span><span>Export Web HTML</span></button>
 <button class="tool-btn large" id="printRibbonBtn" type="button"><span class="icon">🖨</span><span>Print</span></button>
 </div><div class="ribbon-group-label">Export</div></div>
 </div>
@@ -385,13 +408,29 @@
 </section>
 </main>
 <footer class="statusbar">
-<div class="status-group"><span>Mike Markdown Editor (MME) v7.4</span><span id="wordCount">Words: 0</span><span id="charCount">Characters: 0</span><span id="lineCount">Lines: 1</span></div>
+<div class="status-group"><span>Mike Markdown Editor (MME) v7.5</span><span id="wordCount">Words: 0</span><span id="charCount">Characters: 0</span><span id="lineCount">Lines: 1</span></div>
 <div class="status-group"><span id="saveState">Saved locally</span><span id="cursorState">Ln 1, Col 1</span></div>
 </footer>
 </div>
 <div class="drawer-backdrop" id="drawerBackdrop"></div>
+<div class="chooser-backdrop" id="chooserBackdrop"></div>
+<div class="chooser-modal" id="exportChooser" role="dialog" aria-modal="true" aria-labelledby="exportChooserTitle" aria-hidden="true">
+<div class="chooser-header">
+<div>
+<div class="chooser-title" id="exportChooserTitle">Choose export format</div>
+<div class="chooser-subtitle">Pick a preset and click once. No typing exam required.</div>
+</div>
+<button class="quick-btn chooser-close" id="exportChooserCloseBtn" type="button" aria-label="Close export chooser">✕</button>
+</div>
+<div class="chooser-body">
+<button class="chooser-option" id="chooserWebBtn" type="button"><span class="chooser-option-title">Web HTML</span><span class="chooser-option-copy">Interactive HTML for browser viewing and sharing.</span></button>
+<button class="chooser-option" id="chooserPrintBtn" type="button"><span class="chooser-option-title">Print HTML</span><span class="chooser-option-copy">Print focused HTML with cleaner paper layout.</span></button>
+<button class="chooser-option" id="chooserMarkdownBtn" type="button"><span class="chooser-option-title">Markdown</span><span class="chooser-option-copy">Standard Markdown export exactly as written.</span></button>
+<button class="chooser-option" id="chooserMinimalBtn" type="button"><span class="chooser-option-title">Minimal Markdown</span><span class="chooser-option-copy">Cleaned Markdown with excess spacing reduced.</span></button>
+</div>
+</div>
 <aside aria-hidden="true" class="side-drawer" id="sideDrawer">
-<div class="drawer-header"><div class="drawer-title">Mike Markdown Editor (MME) v7.4</div><button class="drawer-btn drawer-close" id="drawerCloseBtn" type="button">✕</button></div>
+<div class="drawer-header"><div class="drawer-title">Mike Markdown Editor (MME) v7.5</div><button class="drawer-btn drawer-close" id="drawerCloseBtn" type="button">✕</button></div>
 <div class="drawer-body">
 <div class="drawer-section"><div class="drawer-section-title">File</div><div class="drawer-section-body">
 <button class="drawer-btn primary" id="drawerNewBtn" type="button">New</button>
@@ -408,19 +447,19 @@
 </div>
 </aside>
 <script>
-    const STORAGE_KEY = "mike_editor_document_v18";
-    const WRAP_KEY = "mike_editor_wrap_v18";
-    const TAB_KEY = "mike_editor_active_tab_v18";
-    const THEME_KEY = "mike_editor_theme_v18";
-    const RIBBON_KEY = "mike_editor_ribbon_collapsed_v18";
-    const OUTLINE_KEY = "mike_editor_outline_open_v18";
-    const PANE_KEY = "mike_editor_pane_width_v18";
-    const EDITOR_VISIBLE_KEY = "mike_editor_editor_visible_v18";
-    const PREVIEW_VISIBLE_KEY = "mike_editor_preview_visible_v18";
+    const STORAGE_KEY = "mike_editor_document_v19";
+    const WRAP_KEY = "mike_editor_wrap_v19";
+    const TAB_KEY = "mike_editor_active_tab_v19";
+    const THEME_KEY = "mike_editor_theme_v19";
+    const RIBBON_KEY = "mike_editor_ribbon_collapsed_v19";
+    const OUTLINE_KEY = "mike_editor_outline_open_v19";
+    const PANE_KEY = "mike_editor_pane_width_v19";
+    const EDITOR_VISIBLE_KEY = "mike_editor_editor_visible_v19";
+    const PREVIEW_VISIBLE_KEY = "mike_editor_preview_visible_v19";
 
-    const ZOOM_KEY = "mike_editor_zoom_v18";
-    const DENSITY_KEY = "mike_editor_density_v18";
-    const OUTLINE_COLLAPSE_KEY = "mike_editor_outline_collapsed_v18";
+    const ZOOM_KEY = "mike_editor_zoom_v19";
+    const DENSITY_KEY = "mike_editor_density_v19";
+    const OUTLINE_COLLAPSE_KEY = "mike_editor_outline_collapsed_v19";
 
     const HISTORY_LIMIT = 200;
 
@@ -453,6 +492,13 @@
     const drawerFullscreenBtn = document.getElementById("drawerFullscreenBtn");
     const menuToggleBtn = document.getElementById("menuToggleBtn");
     const drawerBackdrop = document.getElementById("drawerBackdrop");
+    const chooserBackdrop = document.getElementById("chooserBackdrop");
+    const exportChooser = document.getElementById("exportChooser");
+    const exportChooserCloseBtn = document.getElementById("exportChooserCloseBtn");
+    const chooserWebBtn = document.getElementById("chooserWebBtn");
+    const chooserPrintBtn = document.getElementById("chooserPrintBtn");
+    const chooserMarkdownBtn = document.getElementById("chooserMarkdownBtn");
+    const chooserMinimalBtn = document.getElementById("chooserMinimalBtn");
     const sideDrawer = document.getElementById("sideDrawer");
     const drawerCloseBtn = document.getElementById("drawerCloseBtn");
     const outlineToggleBtn = document.getElementById("outlineToggleBtn");
@@ -492,55 +538,29 @@
     const copyMdBtn = document.getElementById("copyMdBtn");
     const copyMdRibbonBtn = document.getElementById("copyMdRibbonBtn");
     const exportHtmlRibbonBtn = document.getElementById("exportHtmlRibbonBtn");
+    const exportPrintHtmlRibbonBtn = document.getElementById("exportPrintHtmlRibbonBtn");
+    const exportMinimalMdRibbonBtn = document.getElementById("exportMinimalMdRibbonBtn");
 
     mermaid.initialize({ startOnLoad: false, securityLevel: "loose", theme: "default" });
 
-    const DEMO_DOC = `# Mike Editor Demo Document
+    const DEMO_DOC = `# Mike Markdown Editor v7.5 Demo
 
-Welcome to **Mike Editor v7.4**. This demo document showcases the core Markdown features currently supported and gives the outline panel something useful to chew on.
-
----
-
-## 1. Headings and Structure
-
-### 1.1 Level 3 Example
-This is a level 3 heading.
-
-#### 1.1.1 Level 4 Example
-More nesting for outline testing.
-
-##### 1.1.1.1 Level 5 Example
-Still going.
-
-###### 1.1.1.1.1 Level 6 Example
-Maximum heading depth supported.
+A document designed to showcase export, print, preview, and layout behaviour.
 
 ---
 
-## 2. Lists
+## 1. Typography and Structure
 
-### 2.1 Unordered List
-- Item A
-  - Nested A1
-  - Nested A2
-    - Nested A2.1
-- Item B
+### Heading Levels
 
-### 2.2 Ordered List
-1. First
-2. Second
-   1. Second A
-   2. Second B
-3. Third
+# H1 Heading
+## H2 Heading
+### H3 Heading
+#### H4 Heading
+##### H5 Heading
+###### H6 Heading
 
-### 2.3 Task List
-- [ ] Task one
-- [x] Task completed
-- [ ] Task three
-
----
-
-## 3. Text Formatting
+### Emphasis
 
 **Bold text**
 
@@ -550,71 +570,141 @@ Maximum heading depth supported.
 
 \`Inline code\`
 
-> Blockquotes also work. Quietly dramatic, like a paragraph wearing a cape.
+> This is a blockquote.
+> Useful for callouts, notes, and dramatic pauses.
 
 ---
 
-## 4. Links and Images
+## 2. Lists
 
-[OpenAI](https://openai.com)
+### Unordered List
+- Item A
+  - Nested A1
+  - Nested A2
+    - Nested A2.1
+- Item B
 
-![Placeholder Image](https://via.placeholder.com/240x120.png?text=Mike+Editor)
+### Ordered List
+1. First
+2. Second
+   1. Second A
+   2. Second B
+3. Third
+
+### Task List
+- [x] Completed task
+- [ ] Pending task
+- [ ] Another task
 
 ---
 
-## 5. Table
+## 3. Links and Images
 
-| Feature | Status |
-|---|---|
-| Headings | Yes |
-| Lists | Yes |
-| Tables | Yes |
-| Mermaid | Yes |
-| Outline tree | Yes |
+[Visit OpenAI](https://openai.com)
+
+![Placeholder Image](https://via.placeholder.com/480x180.png?text=Mike+Editor+v7.5)
 
 ---
 
-## 6. Code Block
+## 4. Tables
+
+| Feature | Supported | Notes |
+|---|---|---|
+| Markdown | Yes | Core functionality |
+| Mermaid | Yes | Diagram rendering |
+| Print Layout | Yes | A4 oriented |
+| Export Presets | Yes | v7.5 focus |
+
+---
+
+## 5. Code Blocks
 
 \`\`\`javascript
 function greet(name) {
-  console.log("Hello " + name);
+  return \`Hello, \${name}\`;
 }
 
-greet("Mike");
+console.log(greet("Mike"));
+\`\`\`
+
+\`\`\`python
+def greet(name):
+    return f"Hello, {name}"
 \`\`\`
 
 ---
 
-## 7. Mermaid Diagram
+## 6. Mermaid Diagram
 
 \`\`\`mermaid
 flowchart TD
     A[Start] --> B{Decision}
-    B -->|Yes| C[Do Something]
-    B -->|No| D[Do Something Else]
+    B -->|Yes| C[Proceed]
+    B -->|No| D[Stop]
     C --> E[Finish]
     D --> E
 \`\`\`
 
 ---
 
-## 8. Deep Outline Test
+## 7. Print Page Break Test
 
-### Section A
-#### A1
-##### A1.1
+The next section should begin cleanly in Print HTML export.
 
-### Section B
-#### B1
-##### B1.1
-###### B1.1.1
+<div class="page-break"></div>
+
+## New Page Section
+
+This section exists to test page breaks and print layout behaviour.
 
 ---
 
-## 9. Final Section
+## 8. Long Content Print Stress Test
 
-Use the outline buttons to expand and collapse nested headings. In this file, they should finally stop pretending to be decorative.
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+
+Use this section to test:
+- paragraph spacing
+- page breaks
+- table splitting
+- code block wrapping
+- heading behaviour near page boundaries
+
+---
+
+## 9. Export Modes in v7.5
+
+This document is designed to test:
+
+### Web HTML
+- Full styling
+- Browser viewing
+- Rich layout
+
+### Print HTML
+- Clean A4 output
+- Better page handling
+- No editor chrome
+
+### Markdown
+- Raw source export
+
+### Minimal Markdown
+- Cleaner output
+- Reduced excess spacing
+- Simplified structure
+
+---
+
+## 10. Final Notes
+
+Use this demo to test:
+- preview rendering
+- export presets
+- print output
+- mobile versus desktop layout
+
+If something breaks, it will usually break here first.
 `;
 
     const BLANK_DOC = `# New Document
@@ -661,7 +751,11 @@ Start writing here.
       codeblock: () => insertCodeBlock(),
       code: () => applyInlineWrap("`", "`", "inline code"),
       mermaid: () => insertMermaid(),
-      toc: () => insertTOC()
+      toc: () => insertTOC(),
+      exportWeb: () => exportHtmlWeb(),
+      exportPrint: () => exportHtmlPrint(),
+      exportMinimalMd: () => exportMarkdownMinimal(),
+      printDoc: () => printPreview()
     };
 
     function escapeHtml(text="") {
@@ -1461,48 +1555,114 @@ Start writing here.
       setTimeout(() => saveState.textContent = "Saved locally", 1200);
     }
 
-    function exportHtml() {
-      const documentHtml = `<!DOCTYPE html>
+    function getTimestampedName(ext) {
+      return `mike-editor-${new Date().toISOString().slice(0,19).replace(/[:T]/g,"-")}.${ext}`;
+    }
+
+    function downloadTextFile(content, filename, mime) {
+      const blob = new Blob([content], { type: mime });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function buildRenderedHtml() {
+      const parser = (window.marked && typeof marked.parse === "function") ? marked.parse : (s) => `<pre>${escapeHtml(String(s || ""))}</pre>`;
+      return DOMPurify.sanitize(parser(editor.value));
+    }
+
+    function buildExportHtml(mode="web") {
+      const bodyHtml = buildRenderedHtml();
+      const printRules = mode === "print"
+        ? `@page{size:A4;margin:16mm 14mm 16mm 14mm} html,body{background:#fff;margin:0;padding:0} body{font-size:11pt;line-height:1.5} .doc{max-width:none;margin:0;padding:0} h1,h2,h3,h4,h5,h6{break-after:avoid-page;page-break-after:avoid;break-inside:avoid} p,blockquote,ul,ol,table,pre,img{break-inside:avoid;page-break-inside:avoid} pre{white-space:pre-wrap;word-break:break-word}`
+        : `body{background:#f5f7fb}`;
+      const shellClass = mode === "print" ? "doc doc-print" : "doc doc-web";
+      return `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Exported from Mike Markdown Editor (MME) v7.4.2</title>
+<title>Exported from Mike Markdown Editor (MME) v7.5</title>
 <style>
-body{font-family:Segoe UI,Arial,sans-serif;line-height:1.7;max-width:920px;margin:40px auto;padding:0 20px;color:#1f2732}
+:root{color-scheme:light}
+body{font-family:Segoe UI,Arial,sans-serif;line-height:1.7;color:#1f2732}
+.doc{max-width:920px;margin:40px auto;padding:0 20px}
+h1,h2,h3,h4,h5,h6{line-height:1.28;letter-spacing:-.02em;margin:1.25em 0 .55em;color:#0f141a}
+h1{font-size:2rem;border-bottom:1px solid #d8dde6;padding-bottom:.24em} h2{font-size:1.6rem;border-bottom:1px solid #d8dde6;padding-bottom:.2em} h3{font-size:1.28rem}
+p{margin:.9em 0} a{color:#2563eb;text-decoration:none} a:hover{text-decoration:underline}
+blockquote{margin:1.2em 0;padding:.85em 1em;border-left:4px solid #2563eb;background:#f6f9ff;color:#465468;border-radius:0 10px 10px 0}
+hr{border:none;border-top:1px solid #d8dde6;margin:2em 0}
 pre{background:#1f2530;color:#f4f7fb;padding:16px;border-radius:12px;overflow:auto}
-code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
-blockquote{border-left:4px solid #2563eb;padding:.85em 1em;background:#f6f9ff;border-radius:0 10px 10px 0}
-table{width:100%;border-collapse:collapse}th,td{border:1px solid #d8dde6;padding:10px 12px;text-align:left}
-img{max-width:100%;border-radius:12px}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.92em}
+:not(pre)>code{background:#f3f6fb;border:1px solid #d8dde6;padding:.14em .4em;border-radius:8px}
+table{width:100%;border-collapse:collapse;margin:1.2em 0;box-shadow:0 0 0 1px #d8dde6 inset;border-radius:12px;overflow:hidden}
+th,td{border:1px solid #d8dde6;padding:11px 12px;text-align:left}
+th{background:#f3f6fb;font-weight:700} img{max-width:100%;border-radius:12px} ul,ol{padding-left:1.5rem} li{margin:.3em 0}
+${printRules}
 </style>
 </head>
 <body>
-${DOMPurify.sanitize(marked.parse(editor.value))}
+<main class="${shellClass}">
+${bodyHtml}
+</main>
 </body>
 </html>`;
-      const blob = new Blob([documentHtml], { type: "text/html;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `mike-editor-${new Date().toISOString().slice(0,19).replace(/[:T]/g,"-")}.html`;
-      a.click();
-      URL.revokeObjectURL(url);
+    }
+
+    function normalizeMinimalMarkdown(source) {
+      return String(source || "")
+        .replace(/\r\n?/g, "\n")
+        .replace(/\n\s*<div style="page-break-after: always;">\s*<\/div>\s*\n/gi, "\n\n---\n\n")
+        .replace(/[ \t]+$/gm, "")
+        .replace(/\n{3,}/g, "\n\n")
+        .trimEnd() + "\n";
+    }
+
+    function exportHtmlWeb() {
+      downloadTextFile(buildExportHtml("web"), getTimestampedName("html"), "text/html;charset=utf-8");
+      saveState.textContent = "Web HTML exported";
+      setTimeout(() => saveState.textContent = "Saved locally", 1200);
+    }
+
+    function exportHtmlPrint() {
+      downloadTextFile(buildExportHtml("print"), getTimestampedName("print.html"), "text/html;charset=utf-8");
+      saveState.textContent = "Print HTML exported";
+      setTimeout(() => saveState.textContent = "Saved locally", 1200);
     }
 
     function exportMarkdown() {
-      const blob = new Blob([editor.value], { type: "text/markdown;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `mike-editor-${new Date().toISOString().slice(0,19).replace(/[:T]/g,"-")}.md`;
-      a.click();
-      URL.revokeObjectURL(url);
+      downloadTextFile(editor.value, getTimestampedName("md"), "text/markdown;charset=utf-8");
+      saveState.textContent = "Markdown exported";
+      setTimeout(() => saveState.textContent = "Saved locally", 1200);
+    }
+
+    function exportMarkdownMinimal() {
+      downloadTextFile(normalizeMinimalMarkdown(editor.value), getTimestampedName("minimal.md"), "text/markdown;charset=utf-8");
+      saveState.textContent = "Minimal Markdown exported";
+      setTimeout(() => saveState.textContent = "Saved locally", 1200);
+    }
+
+    function closeExportChooser() {
+      exportChooser.classList.remove("open");
+      chooserBackdrop.classList.remove("open");
+      exportChooser.setAttribute("aria-hidden", "true");
+      document.body.classList.remove("chooser-open");
+    }
+
+    function chooseExportPreset() {
+      if (UIState.drawerOpen) closeDrawer();
+      exportChooser.classList.add("open");
+      chooserBackdrop.classList.add("open");
+      exportChooser.setAttribute("aria-hidden", "false");
+      document.body.classList.add("chooser-open");
     }
 
     async function copyHtml() {
       try {
-        await navigator.clipboard.writeText(DOMPurify.sanitize(marked.parse(editor.value)));
+        await navigator.clipboard.writeText(buildRenderedHtml());
         saveState.textContent = "HTML copied";
       } catch {
         saveState.textContent = "Clipboard blocked";
@@ -1607,15 +1767,17 @@ ${DOMPurify.sanitize(marked.parse(editor.value))}
     ribbonTabs.forEach((tab) => tab.onclick = () => setRibbonTab(tab.dataset.tab));
 
     document.getElementById("newDocBtn").onclick = newDocument;
-    document.getElementById("exportMdBtn").onclick = exportMarkdown;
+    document.getElementById("exportMdBtn").onclick = chooseExportPreset;
     document.getElementById("copyHtmlBtn").onclick = copyHtml;
     document.getElementById("copyMdBtn").onclick = copyMarkdown;
     document.getElementById("printBtn").onclick = printPreview;
     document.getElementById("insertDateBtn").onclick = () => insertText("", "", new Date().toLocaleDateString(undefined, { year:"numeric", month:"long", day:"numeric" }));
-    document.getElementById("exportRibbonBtn").onclick = exportMarkdown;
+    document.getElementById("exportRibbonBtn").onclick = chooseExportPreset;
     document.getElementById("copyRibbonBtn").onclick = copyHtml;
     document.getElementById("copyMdRibbonBtn").onclick = copyMarkdown;
-    document.getElementById("exportHtmlRibbonBtn").onclick = exportHtml;
+    document.getElementById("exportHtmlRibbonBtn").onclick = exportHtmlWeb;
+    if (exportPrintHtmlRibbonBtn) exportPrintHtmlRibbonBtn.onclick = exportHtmlPrint;
+    if (exportMinimalMdRibbonBtn) exportMinimalMdRibbonBtn.onclick = exportMarkdownMinimal;
     document.getElementById("printRibbonBtn").onclick = printPreview;
     findBtn.onclick = findNext;
     replaceBtn.onclick = replaceText;
@@ -1665,13 +1827,19 @@ ${DOMPurify.sanitize(marked.parse(editor.value))}
     const drawerNewBtn = document.getElementById("drawerNewBtn");
     if (drawerNewBtn) drawerNewBtn.onclick = () => { closeDrawer(); newDocument(); };
     const drawerExportBtn = document.getElementById("drawerExportBtn");
-    if (drawerExportBtn) drawerExportBtn.onclick = () => { closeDrawer(); exportMarkdown(); };
+    if (drawerExportBtn) drawerExportBtn.onclick = () => { closeDrawer(); chooseExportPreset(); };
+    if (exportChooserCloseBtn) exportChooserCloseBtn.onclick = closeExportChooser;
+    if (chooserBackdrop) chooserBackdrop.onclick = closeExportChooser;
+    if (chooserWebBtn) chooserWebBtn.onclick = () => { closeExportChooser(); exportHtmlWeb(); };
+    if (chooserPrintBtn) chooserPrintBtn.onclick = () => { closeExportChooser(); exportHtmlPrint(); };
+    if (chooserMarkdownBtn) chooserMarkdownBtn.onclick = () => { closeExportChooser(); exportMarkdown(); };
+    if (chooserMinimalBtn) chooserMinimalBtn.onclick = () => { closeExportChooser(); exportMarkdownMinimal(); };
     const drawerCopyMdBtn = document.getElementById("drawerCopyMdBtn");
     if (drawerCopyMdBtn) drawerCopyMdBtn.onclick = () => { closeDrawer(); copyMarkdown(); };
     const drawerCopyHtmlBtn = document.getElementById("drawerCopyHtmlBtn");
     if (drawerCopyHtmlBtn) drawerCopyHtmlBtn.onclick = () => { closeDrawer(); copyHtml(); };
     const drawerExportHtmlBtn = document.getElementById("drawerExportHtmlBtn");
-    if (drawerExportHtmlBtn) drawerExportHtmlBtn.onclick = () => { closeDrawer(); exportHtml(); };
+    if (drawerExportHtmlBtn) drawerExportHtmlBtn.onclick = () => { closeDrawer(); exportHtmlWeb(); };
     const drawerPrintBtn = document.getElementById("drawerPrintBtn");
     if (drawerPrintBtn) drawerPrintBtn.onclick = () => { closeDrawer(); printPreview(); };
     importFile.onchange = (e) => {
@@ -1698,7 +1866,7 @@ ${DOMPurify.sanitize(marked.parse(editor.value))}
         editor.setSelectionRange(start + 2, start + 2);
         triggerUpdate();
       }
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") { e.preventDefault(); exportMarkdown(); }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") { e.preventDefault(); chooseExportPreset(); }
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "b") { e.preventDefault(); CommandRegistry.bold(); }
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "i") { e.preventDefault(); CommandRegistry.italic(); }
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "x") { e.preventDefault(); CommandRegistry.strike(); }
@@ -1719,7 +1887,10 @@ ${DOMPurify.sanitize(marked.parse(editor.value))}
       if ((e.ctrlKey || e.metaKey) && e.key === "0") { e.preventDefault(); setZoom(1); }
       if ((e.ctrlKey || e.metaKey) && e.altKey && e.key === "[") { e.preventDefault(); collapseAllOutline(); }
       if ((e.ctrlKey || e.metaKey) && e.altKey && e.key === "]") { e.preventDefault(); expandAllOutline(); }
-      if (e.key === "Escape") closeDrawer();
+      if (e.key === "Escape") {
+        if (exportChooser.classList.contains("open")) closeExportChooser();
+        else closeDrawer();
+      }
     };
 
     editor.onpaste = handleSmartPaste;
