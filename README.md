@@ -9,92 +9,133 @@ https://averydimbulb79.github.io/mike_editor/index.html
 
 ## Overview
 
-Mike Markdown Editor (MME) is a browser-based Markdown writing environment designed to behave more like a structured document editor rather than a plain text editor.
+Mike Markdown Editor (MME) is a browser-based Markdown writing environment built to behave more like a structured document editor than a plain text box.
 
-It focuses on one core principle:
+It is designed around one practical goal:
 
-Markdown should produce clean, readable, and export-ready documents by default.
+Markdown should produce clean, readable, previewable, and export-ready documents without the user having to fight the editor.
 
-Most Markdown editors fail at this. Common issues include:
+Most Markdown editors are either too bare, too code-centric, or too weak at print and export. Common problems include:
 
-• no page structure  
-• broken formatting on export  
-• poor typography  
-• unreadable layouts  
-• inconsistent rendering  
+• poor document structure  
+• weak print formatting  
+• inconsistent preview behaviour  
+• limited editing controls  
+• awkward export workflows  
 
-MME is built to solve these problems from the ground up.
+MME is built to address those gaps directly.
 
 ---
 
 ## Current Version
 
-v7.4
+v7.5
 
-This version introduces structural maturity in layout control, outline behaviour, and usability.
+This version strengthens export workflows, improves print-oriented output, and updates the in-app demo content so the editor better showcases what it can actually do.
 
 ---
 
 ## Key Features
 
-### Structured Editing Environment
-• Split editor and preview  
-• Real-time rendering  
-• Clean document layout  
-• Print-friendly output  
+### Document-Centric Markdown Editing
+• Split editor and preview layout  
+• Real-time preview rendering  
+• Print-friendly document structure  
+• Built-in demo document for testing features  
 
 ### Multi-Ribbon Interface
-• Desktop-style ribbon layout  
-• Logical grouping of tools  
-• Scalable architecture for future expansion  
+• Desktop-style ribbon organisation  
+• Tool groups by function  
+• Scalable structure for future expansion  
 
-### Markdown + Extended Support
-• Standard Markdown formatting  
-• Tables, code blocks, links, images  
-• Task lists  
-• Mermaid diagram rendering  
+### Markdown Support
+• Standard Markdown syntax  
+• Headings H1 to H6  
+• Bold, italic, strikethrough, inline code  
+• Ordered, unordered, and task lists  
+• Blockquotes  
+• Tables  
+• Code fences  
+• Links and images  
+
+### Mermaid Support
+• Mermaid diagram blocks render in preview  
+• Built-in Mermaid example in the demo document  
 
 ### Outline Panel
-• Auto-generated from headings  
-• Nested hierarchy (H1–H6)  
+• Auto-generated from document headings  
+• Nested heading hierarchy  
 • Click-to-jump navigation  
-• Expand all / collapse all  
-• Active section tracking  
+• Expand and collapse support  
+• Active-section tracking  
 
-### View & Layout Controls
-• Adjustable editor width  
-• Zoom controls (in, out, reset)  
-• Light / dark mode  
-• UI density toggle (compact / comfortable)  
-• Reset layout to default  
+### View and Layout Controls
+• Adjustable pane width  
+• Zoom controls  
+• Light and dark mode  
+• Compact and comfortable density modes  
+• Layout reset controls  
 
 ### Smart Editing Behaviour
-• Auto-continuation for lists  
-• Smart paste handling  
-• Improved text manipulation reliability  
+• Auto-continue for Markdown lists  
+• Smarter paste handling  
+• Improved text replacement reliability  
 
-### Built-in Demo Template
-• Fully structured sample document  
-• Exercises all supported Markdown features  
-• Allows immediate testing of outline and editor behaviour  
+### Export and Print
+• Clickable export chooser  
+• Export presets for:
+  • Web HTML  
+  • Print HTML  
+  • Markdown  
+  • Minimal Markdown  
+• Improved print CSS for cleaner A4-style output  
+• Better print handling for headings, tables, images, and code blocks  
 
 ---
 
-## What Makes It Different
+## What Changed in v7.5
 
-MME prioritises **document integrity over raw editing speed**.
+v7.5 is primarily an export and print refinement release.
 
-It is designed to behave more like:
+### Export Workflow Upgrade
+The export flow is now easier and more explicit.
 
-• Microsoft Word (structure and layout)  
-• Notion (clean rendering)  
-• Obsidian (Markdown flexibility)  
+Instead of relying on a typed preset prompt, v7.5 introduces a clickable export chooser with buttons for:
 
-while remaining:
+• Web HTML  
+• Print HTML  
+• Markdown  
+• Minimal Markdown  
 
-• lightweight  
-• browser-based  
-• dependency-free  
+This export chooser is available from:
+
+• the top-right Export button  
+• the mobile drawer Export button  
+• the ribbon Export Preset control  
+• Ctrl/Cmd + S  
+
+### Print Output Improvements
+Print-oriented output has been refined with:
+
+• cleaner A4-style margins  
+• safer page handling  
+• better behaviour for long documents  
+• reduced awkward page breaks around headings and blocks  
+• more reliable code wrapping in print  
+
+### Updated In-App Demo Document
+The example content in the editor and preview panes has been refreshed to better reflect v7.5.
+
+The demo now includes:
+
+• expanded heading hierarchy  
+• lists and task lists  
+• tables  
+• code blocks  
+• Mermaid diagram example  
+• print page-break test  
+• export-focused sections  
+• longer content for preview and print stress testing  
 
 ---
 
@@ -106,11 +147,11 @@ No installation required.
 No backend required.  
 No build process required.  
 
-Open the file in any modern browser and start writing.
+Open the file in a modern browser and start writing.
 
 ---
 
-## Controls & Shortcuts
+## Controls and Shortcuts
 
 ### Zoom
 • Ctrl/Cmd + = → Zoom in  
@@ -121,68 +162,94 @@ Open the file in any modern browser and start writing.
 • Ctrl/Cmd + Alt + ] → Expand all  
 • Ctrl/Cmd + Alt + [ → Collapse all  
 
----
-
-## Version 7.4 Highlights
-
-This version focuses on usability, visibility, and structural clarity.
-
-### Major Improvements
-• Functional outline expansion and collapse  
-• Deep hierarchy support in outline  
-• Layout reset system  
-• Zoom system with persistence  
-• UI density control  
-• Improved keyboard shortcuts  
-
-### Demo Experience Upgrade
-• Default document now showcases all features  
-• Users can immediately test:
-  • outline behaviour  
-  • list handling  
-  • Mermaid rendering  
-  • formatting tools  
+### Export
+• Ctrl/Cmd + S → Open export chooser  
 
 ---
 
-## Roadmap Direction
+## Built-In Demo Document
 
-### v7.x (Stabilisation Phase)
-• Expand toolbar to full document editor capability  
-• Improve insertion tools and formatting controls  
-• Enhance outline filtering and navigation  
-• Strengthen document state management  
+The default demo document is meant to do real work, not just fill empty space.
 
-### v8 (Next Phase)
-• Real-time WYSIWYG editing (no split view)  
-• True document surface rendering  
-• Drag-and-drop layout elements  
-• Advanced formatting controls  
+It is used to test:
+
+• preview rendering  
+• outline hierarchy  
+• Mermaid rendering  
+• print page breaks  
+• export presets  
+• long-form document behaviour  
+
+This makes the example document both a feature showcase and a practical debugging surface.
 
 ---
 
-## Philosophy
+## What Makes It Different
 
-MME is built on a simple idea:
+MME prioritises document integrity over raw syntax editing.
 
-Markdown is not just text.  
-It is a document system.
+It aims to combine:
 
-And a document should:
+• Word-like structure awareness  
+• Markdown flexibility  
+• browser simplicity  
+• print/export reliability  
 
-• look good  
-• behave predictably  
-• export cleanly  
-• scale with complexity  
+The goal is not just to edit Markdown.
+
+The goal is to produce documents that hold together properly.
 
 ---
 
 ## Usage
 
 1. Open the HTML file in your browser  
-2. Start writing or use the demo document  
-3. Use the ribbon to format and insert elements  
-4. Export or print with clean formatting  
+2. Start with the built-in demo or create a new document  
+3. Use the ribbon and top controls to format and structure content  
+4. Preview in real time  
+5. Export using the preset chooser  
+6. Print with cleaner output formatting  
+
+---
+
+## Project Direction
+
+### v7.x Focus
+The v7 series is about stabilising the editor foundation and making the app behave like a reliable document tool.
+
+Focus areas include:
+
+• toolbar expansion  
+• stronger formatting controls  
+• cleaner export flows  
+• more robust state handling  
+• better preview and print fidelity  
+
+### v8 Direction
+Planned future direction includes:
+
+• more direct WYSIWYG-style interaction  
+• richer document-surface editing  
+• stronger visual formatting controls  
+• broader editor functionality  
+
+---
+
+## Philosophy
+
+Markdown is not just raw text.
+
+It is a document system.
+
+And a document system should:
+
+• look clean  
+• behave predictably  
+• preview correctly  
+• export properly  
+• scale to more complex writing  
+
+MME is built around that premise.
 
 ---
 
@@ -190,7 +257,7 @@ And a document should:
 
 Active development
 
-v7.x is focused on stabilising the editor foundation before moving into full WYSIWYG capabilities in v8.
+v7.5 continues the stabilisation phase by refining export, print, and real-world usability.
 
 ---
 
