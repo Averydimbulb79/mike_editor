@@ -1476,6 +1476,14 @@ Start writing here.
     }
 
     function normalizePastedText(text) {
+  // Detect Markdown tables and skip auto-bulleting
+  const linesCheck = text.replace(/\r\n?/g, "\n").split("\n");
+  const looksLikeMarkdownTable =
+    linesCheck.length >= 2 &&
+    linesCheck[0].trim().startsWith("|") &&
+    linesCheck[1].trim().startsWith("|");
+  if (looksLikeMarkdownTable) return text;
+
       let normalized = text.replace(/\r\n?/g, "\n");
       if (/^https?:\/\/\S+$/i.test(normalized.trim())) {
         const url = normalized.trim();
@@ -1486,7 +1494,7 @@ Start writing here.
       const shouldBulletize = lines.length > 1 && lines.every((line) => {
         const trimmed = line.trim();
         if (!trimmed) return true;
-        return !/^([\-+*]|\d+\.|>)/.test(trimmed) && trimmed.length > 0;
+        return !/^([\-+*]|\d+\.|>|\|)/.test(trimmed) && trimmed.length > 0;
       });
       if (shouldBulletize) {
         normalized = lines.map((line) => line.trim() ? `- ${line.trim()}` : "").join("\n");
