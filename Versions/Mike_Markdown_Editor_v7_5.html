@@ -161,7 +161,11 @@
     .drawer-backdrop.open { opacity: 1; pointer-events: auto; }
     .side-drawer { position: fixed; top: 0; right: 0; width: min(340px,88vw); height: 100dvh; background: color-mix(in srgb, var(--surface) 96%, transparent); border-left: 1px solid var(--line); box-shadow: -12px 0 32px rgba(20,30,50,.14); transform: translateX(100%); transition: transform .24s ease; z-index: 120; display: grid; grid-template-rows: auto 1fr; backdrop-filter: blur(10px); overflow: hidden; }
     .side-drawer.open { transform: translateX(0); }
-    .chooser-backdrop { position: fixed; inset: 0; background: rgba(15,20,26,.35); opacity: 0; pointer-events: none; transition: opacity .2s ease; z-index: 130; backdrop-filter: blur(2px); }
+        .newdoc-backdrop { position: fixed; inset: 0; background: rgba(15,20,26,.35); opacity: 0; pointer-events: none; transition: opacity .2s ease; z-index: 130; backdrop-filter: blur(2px); }
+    .newdoc-backdrop.open { opacity: 1; pointer-events: auto; }
+    .newdoc-modal { position: fixed; inset: 50% auto auto 50%; transform: translate(-50%,-46%) scale(.98); width: min(520px, calc(100vw - 24px)); background: color-mix(in srgb, var(--surface) 97%, transparent); border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 20px 60px rgba(18,28,45,.22); opacity: 0; pointer-events: none; transition: transform .2s ease, opacity .2s ease; z-index: 140; overflow: hidden; }
+    .newdoc-modal.open { opacity: 1; pointer-events: auto; transform: translate(-50%,-50%) scale(1); }
+.chooser-backdrop { position: fixed; inset: 0; background: rgba(15,20,26,.35); opacity: 0; pointer-events: none; transition: opacity .2s ease; z-index: 130; backdrop-filter: blur(2px); }
     .chooser-backdrop.open { opacity: 1; pointer-events: auto; }
     .chooser-modal { position: fixed; inset: 50% auto auto 50%; transform: translate(-50%,-46%) scale(.98); width: min(520px, calc(100vw - 24px)); background: color-mix(in srgb, var(--surface) 97%, transparent); border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 20px 60px rgba(18,28,45,.22); opacity: 0; pointer-events: none; transition: transform .2s ease, opacity .2s ease; z-index: 140; overflow: hidden; }
     .chooser-modal.open { opacity: 1; pointer-events: auto; transform: translate(-50%,-50%) scale(1); }
@@ -413,6 +417,20 @@
 </footer>
 </div>
 <div class="drawer-backdrop" id="drawerBackdrop"></div>
+<div class="newdoc-backdrop" id="newDocBackdrop"></div>
+<div class="newdoc-modal" id="newDocChooser" role="dialog" aria-modal="true" aria-labelledby="newDocChooserTitle" aria-hidden="true">
+<div class="chooser-header">
+<div>
+<div class="chooser-title" id="newDocChooserTitle">Create new document</div>
+<div class="chooser-subtitle">Choose a starting template and click once.</div>
+</div>
+<button class="quick-btn chooser-close" id="newDocChooserCloseBtn" type="button" aria-label="Close new document chooser">✕</button>
+</div>
+<div class="chooser-body">
+<button class="chooser-option" id="chooserDemoDocBtn" type="button"><span class="chooser-option-title">Demo Document</span><span class="chooser-option-copy">Load the full v7.5 showcase template for testing preview, export, print, and layout.</span></button>
+<button class="chooser-option" id="chooserBlankDocBtn" type="button"><span class="chooser-option-title">Blank Document</span><span class="chooser-option-copy">Start with a clean empty document and no sample content.</span></button>
+</div>
+</div>
 <div class="chooser-backdrop" id="chooserBackdrop"></div>
 <div class="chooser-modal" id="exportChooser" role="dialog" aria-modal="true" aria-labelledby="exportChooserTitle" aria-hidden="true">
 <div class="chooser-header">
@@ -492,6 +510,11 @@
     const drawerFullscreenBtn = document.getElementById("drawerFullscreenBtn");
     const menuToggleBtn = document.getElementById("menuToggleBtn");
     const drawerBackdrop = document.getElementById("drawerBackdrop");
+    const newDocBackdrop = document.getElementById("newDocBackdrop");
+    const newDocChooser = document.getElementById("newDocChooser");
+    const newDocChooserCloseBtn = document.getElementById("newDocChooserCloseBtn");
+    const chooserDemoDocBtn = document.getElementById("chooserDemoDocBtn");
+    const chooserBlankDocBtn = document.getElementById("chooserBlankDocBtn");
     const chooserBackdrop = document.getElementById("chooserBackdrop");
     const exportChooser = document.getElementById("exportChooser");
     const exportChooserCloseBtn = document.getElementById("exportChooserCloseBtn");
@@ -1476,14 +1499,6 @@ Start writing here.
     }
 
     function normalizePastedText(text) {
-  // Detect Markdown tables and skip auto-bulleting
-  const linesCheck = text.replace(/\r\n?/g, "\n").split("\n");
-  const looksLikeMarkdownTable =
-    linesCheck.length >= 2 &&
-    linesCheck[0].trim().startsWith("|") &&
-    linesCheck[1].trim().startsWith("|");
-  if (looksLikeMarkdownTable) return text;
-
       let normalized = text.replace(/\r\n?/g, "\n");
       if (/^https?:\/\/\S+$/i.test(normalized.trim())) {
         const url = normalized.trim();
@@ -1494,7 +1509,7 @@ Start writing here.
       const shouldBulletize = lines.length > 1 && lines.every((line) => {
         const trimmed = line.trim();
         if (!trimmed) return true;
-        return !/^([\-+*]|\d+\.|>|\|)/.test(trimmed) && trimmed.length > 0;
+        return !/^([\-+*]|\d+\.|>)/.test(trimmed) && trimmed.length > 0;
       });
       if (shouldBulletize) {
         normalized = lines.map((line) => line.trim() ? `- ${line.trim()}` : "").join("\n");
@@ -1713,20 +1728,24 @@ ${bodyHtml}
       triggerUpdate();
     }
 
+    function closeNewDocChooser() {
+      newDocChooser.classList.remove("open");
+      newDocBackdrop.classList.remove("open");
+      newDocChooser.setAttribute("aria-hidden", "true");
+      document.body.classList.remove("chooser-open");
+    }
+
+    function openNewDocChooser() {
+      if (UIState.drawerOpen) closeDrawer();
+      if (exportChooser.classList.contains("open")) closeExportChooser();
+      newDocChooser.classList.add("open");
+      newDocBackdrop.classList.add("open");
+      newDocChooser.setAttribute("aria-hidden", "false");
+      document.body.classList.add("chooser-open");
+    }
+
     function newDocument() {
-      const choice = prompt(
-        "Create a new document. Type DEMO for the full showcase template, BLANK for an empty starter, or CANCEL to keep the current document.",
-        "DEMO"
-      );
-      if (choice === null) return;
-      const normalized = String(choice || "").trim().toUpperCase();
-      if (!normalized) return;
-      if (!confirm("Replace the current document with a new template?")) return;
-      if (normalized === "BLANK") {
-        applyTemplate(BLANK_DOC);
-      } else {
-        applyTemplate(DEMO_DOC);
-      }
+      openNewDocChooser();
     }
 
     function openDrawer() {
@@ -1836,6 +1855,10 @@ ${bodyHtml}
     if (drawerNewBtn) drawerNewBtn.onclick = () => { closeDrawer(); newDocument(); };
     const drawerExportBtn = document.getElementById("drawerExportBtn");
     if (drawerExportBtn) drawerExportBtn.onclick = () => { closeDrawer(); chooseExportPreset(); };
+    if (newDocChooserCloseBtn) newDocChooserCloseBtn.onclick = closeNewDocChooser;
+    if (newDocBackdrop) newDocBackdrop.onclick = closeNewDocChooser;
+    if (chooserDemoDocBtn) chooserDemoDocBtn.onclick = () => { closeNewDocChooser(); applyTemplate(DEMO_DOC); };
+    if (chooserBlankDocBtn) chooserBlankDocBtn.onclick = () => { closeNewDocChooser(); applyTemplate(BLANK_DOC); };
     if (exportChooserCloseBtn) exportChooserCloseBtn.onclick = closeExportChooser;
     if (chooserBackdrop) chooserBackdrop.onclick = closeExportChooser;
     if (chooserWebBtn) chooserWebBtn.onclick = () => { closeExportChooser(); exportHtmlWeb(); };
@@ -1896,7 +1919,8 @@ ${bodyHtml}
       if ((e.ctrlKey || e.metaKey) && e.altKey && e.key === "[") { e.preventDefault(); collapseAllOutline(); }
       if ((e.ctrlKey || e.metaKey) && e.altKey && e.key === "]") { e.preventDefault(); expandAllOutline(); }
       if (e.key === "Escape") {
-        if (exportChooser.classList.contains("open")) closeExportChooser();
+        if (newDocChooser.classList.contains("open")) closeNewDocChooser();
+        else if (exportChooser.classList.contains("open")) closeExportChooser();
         else closeDrawer();
       }
     };
