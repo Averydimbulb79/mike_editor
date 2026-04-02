@@ -70,18 +70,20 @@
     .ribbon-tabs { display: flex; align-items: end; gap: 4px; padding: 8px 14px 0; border-bottom: 1px solid var(--line); background: var(--surface-2); overflow-x: auto; }
     .ribbon-tab { height: 36px; padding: 0 14px; border-bottom: none; border-radius: 10px 10px 0 0; background: transparent; color: var(--muted); font-size: 13px; font-weight: 700; flex: 0 0 auto; }
     .ribbon-tab.active { background: var(--surface); color: var(--accent); }
-    .ribbon { background: var(--surface); border-bottom: 1px solid var(--line); padding: 10px 12px; overflow-x: auto; overflow-y: hidden; max-height: 220px; transition: max-height .18s ease, padding .18s ease, border-color .18s ease; }
+    .ribbon { background: var(--surface); border-bottom: 1px solid var(--line); padding: 6px 10px; overflow-x: auto; overflow-y: hidden; max-height: 110px; transition: max-height .18s ease, padding .18s ease, border-color .18s ease; }
     .ribbon.collapsed { max-height: 0; padding-top: 0; padding-bottom: 0; border-bottom-color: transparent; }
     .ribbon-panel { display: none; }
     .ribbon-panel.active { display: block; }
-    .ribbon-row { display: flex; align-items: stretch; gap: 10px; min-width: max-content; }
-    .ribbon-group { display: grid; grid-template-rows: 1fr auto; min-width: fit-content; border: 1px solid var(--line); background: linear-gradient(180deg,var(--surface) 0%,var(--panel) 100%); border-radius: 12px; overflow: hidden; }
-    .ribbon-group-body { display: flex; gap: 6px; padding: 8px; align-items: stretch; min-height: 72px; }
-    .ribbon-group-label { border-top: 1px solid var(--line); background: var(--surface-2); color: var(--muted); font-size: 11px; text-align: center; padding: 4px 8px; }
-    .ribbon-col { display: flex; flex-direction: column; gap: 6px; }
-    .ribbon-stack { display: grid; grid-template-columns: repeat(2, minmax(42px, auto)); gap: 6px; }
-    .tool-btn { min-width: 42px; height: 30px; padding: 0 10px; border-radius: 8px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; }
-    .tool-btn.large { width: 88px; height: 64px; flex-direction: column; padding: 8px 6px; line-height: 1.05; font-size: 11px; font-weight: 700; text-align: center; white-space: normal; }
+    .ribbon-row { display: flex; align-items: stretch; gap: 8px; min-width: max-content; flex-wrap: nowrap; }
+    .ribbon-group { display: grid; grid-template-rows: 1fr auto; min-width: fit-content; border: 1px solid var(--line); background: linear-gradient(180deg,var(--surface) 0%,var(--panel) 100%); border-radius: 10px; overflow: hidden; }
+    .ribbon-group-body { display: flex; gap: 6px; padding: 6px 8px; align-items: center; min-height: 0; flex-wrap: nowrap; }
+    .ribbon-group-label { border-top: 1px solid var(--line); background: var(--surface-2); color: var(--muted); font-size: 10px; text-align: center; padding: 3px 8px; line-height: 1.1; }
+    .ribbon-col { display: flex; flex-direction: row; gap: 6px; align-items: center; }
+    .ribbon-stack { display: flex; gap: 6px; align-items: center; }
+    .tool-btn, .tool-select { min-width: 42px; height: 34px; padding: 0 12px; border-radius: 8px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; border: 1px solid var(--line); background: var(--surface); color: var(--text); font-family: var(--font-ui); }
+    .tool-btn.large { width: auto; height: 34px; flex-direction: row; padding: 0 12px; line-height: 1.1; font-size: 12px; font-weight: 600; text-align: center; white-space: nowrap; }
+    .tool-btn .icon { font-size: 13px; line-height: 1; }
+    .tool-select { cursor: pointer; min-width: 118px; }
     .mobile-view-switch { display: none; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--line); background: var(--surface-3); }
     .mobile-switch-btn { flex: 1; height: 38px; border-radius: 10px; color: var(--muted); font-size: 13px; font-weight: 700; }
     .mobile-switch-btn.active { background: var(--accent-soft); color: var(--accent); border-color: color-mix(in srgb, var(--accent) 55%, var(--line)); }
@@ -117,8 +119,8 @@
     body[data-density="compact"] .ribbon-tab { height: 32px; font-size: 12px; }
     body[data-density="compact"] .ribbon { padding: 8px 10px; }
     body[data-density="compact"] .ribbon-group-body { padding: 6px; min-height: 64px; }
-    body[data-density="compact"] .tool-btn { height: 28px; font-size: 12px; }
-    body[data-density="compact"] .tool-btn.large { width: 82px; height: 58px; font-size: 10px; }
+    body[data-density="compact"] .tool-btn, body[data-density="compact"] .tool-select { height: 30px; font-size: 11px; padding: 0 10px; }
+    body[data-density="compact"] .tool-btn.large { width: auto; height: 30px; font-size: 11px; }
     body[data-density="compact"] .sidebar-header, body[data-density="compact"] .pane-header { height: 38px; padding: 0 12px; }
     body[data-density="compact"] .editor-wrap, body[data-density="compact"] .preview-wrap { padding: 12px 10px; }
     #editor { font-size: var(--editor-font-size); }
@@ -213,8 +215,8 @@
       .app { grid-template-rows: calc(var(--topbar-h) + var(--safe-top)) auto auto auto minmax(0,1fr) calc(var(--status-h) + var(--safe-bottom)); }
       .topbar { padding-left: 12px; padding-right: 12px; }
       .mobile-view-switch { display: flex; }
-      .ribbon { padding: 8px 10px; }
-      .tool-btn.large { width: 72px; height: 60px; }
+      .ribbon { padding: 6px 8px; }
+      .tool-btn.large { width: auto; height: 32px; }
       .editor-wrap, .preview-wrap { padding: 14px 10px; }
       .document-surface { width: 100%; }
     }
@@ -240,7 +242,7 @@
 <div class="topbar-left">
 <div class="app-badge">M</div>
 <div class="brand">
-<div class="brand-title">Mike Markdown Editor (MME) v7.5</div>
+<div class="brand-title">Mike Markdown Editor (MME) v7.6</div>
 <div class="brand-subtitle">Document-first Markdown Editor with Mermaid Support</div>
 </div>
 </div>
@@ -269,116 +271,94 @@
 <div class="ribbon-panel active" data-panel="home">
 <div class="ribbon-row">
 <div class="ribbon-group"><div class="ribbon-group-body">
-<button class="tool-btn large" id="ribbonCollapseBtn" type="button"><span class="icon">⌃</span><span>Collapse</span></button>
-<button class="tool-btn large" id="insertDateBtn" type="button"><span class="icon">📅</span><span>Date</span></button>
-<button class="tool-btn large" id="findBtn" type="button"><span class="icon">⌕</span><span>Find</span></button>
-<button class="tool-btn large" id="replaceBtn" type="button"><span class="icon">⇄</span><span>Replace</span></button>
+<button class="tool-btn" id="ribbonCollapseBtn" type="button"><span class="icon">⌃</span><span>Collapse</span></button>
+<button class="tool-btn" id="insertDateBtn" type="button"><span class="icon">📅</span><span>Date</span></button>
+<button class="tool-btn" id="findBtn" type="button"><span class="icon">⌕</span><span>Find</span></button>
+<button class="tool-btn" id="replaceBtn" type="button"><span class="icon">⇄</span><span>Replace</span></button>
 </div><div class="ribbon-group-label">Document</div></div>
 <div class="ribbon-group"><div class="ribbon-group-body">
-<div class="ribbon-col">
-<button class="tool-btn" data-action="h1" type="button">Heading 1</button>
-<button class="tool-btn" data-action="h2" type="button">Heading 2</button>
-</div>
-<div class="ribbon-col">
-<button class="tool-btn" data-action="h3" type="button">Heading 3</button>
-<button class="tool-btn" data-action="h4" type="button">Heading 4</button>
-<button class="tool-btn" data-action="quote" type="button">Quote</button>
-</div>
+<select class="tool-select" id="headingSelect">
+<option value="">Heading</option>
+<option value="h1">Heading 1</option>
+<option value="h2">Heading 2</option>
+<option value="h3">Heading 3</option>
+<option value="h4">Heading 4</option>
+<option value="h5">Heading 5</option>
+<option value="h6">Heading 6</option>
+<option value="quote">Quote</option>
+</select>
+<button class="tool-btn" data-action="bold" type="button">Bold</button>
+<button class="tool-btn" data-action="italic" type="button">Italic</button>
+<button class="tool-btn" data-action="strike" type="button">Strike</button>
 </div><div class="ribbon-group-label">Styles</div></div>
 <div class="ribbon-group"><div class="ribbon-group-body">
-<button class="tool-btn large" data-action="bold" type="button"><span class="icon"><strong>B</strong></span><span>Bold</span></button>
-<button class="tool-btn large" data-action="italic" type="button"><span class="icon"><em>I</em></span><span>Italic</span></button>
-<button class="tool-btn large" data-action="strike" type="button"><span class="icon"><s>S</s></span><span>Strike</span></button>
-</div><div class="ribbon-group-label">Font</div></div>
-<div class="ribbon-group"><div class="ribbon-group-body">
-<div class="ribbon-stack">
 <button class="tool-btn" data-action="ul" type="button">Bullets</button>
 <button class="tool-btn" data-action="ol" type="button">Numbers</button>
 <button class="tool-btn" data-action="task" type="button">Tasks</button>
 <button class="tool-btn" data-action="hr" type="button">Rule</button>
-</div>
 </div><div class="ribbon-group-label">Paragraph</div></div>
 <div class="ribbon-group"><div class="ribbon-group-body">
-<div class="ribbon-col">
-<button class="tool-btn large" id="undoBtn" type="button"><span class="icon">↶</span><span>Undo</span></button>
-</div>
-<div class="ribbon-col">
-<button class="tool-btn large" id="redoBtn" type="button"><span class="icon">↷</span><span>Redo</span></button>
-</div>
+<button class="tool-btn" id="undoBtn" type="button"><span class="icon">↶</span><span>Undo</span></button>
+<button class="tool-btn" id="redoBtn" type="button"><span class="icon">↷</span><span>Redo</span></button>
 </div><div class="ribbon-group-label">History</div></div>
 </div>
 </div>
 <div class="ribbon-panel" data-panel="insert">
 <div class="ribbon-row">
 <div class="ribbon-group"><div class="ribbon-group-body">
-<div class="ribbon-col">
 <button class="tool-btn" data-action="link" type="button">Link</button>
-<button class="tool-btn" data-action="image" type="button">Image URL</button>
-<button class="tool-btn" data-action="toc" type="button">TOC</button>
-</div>
-<div class="ribbon-col">
 <button class="tool-btn" data-action="table" type="button">Table</button>
 <button class="tool-btn" data-action="codeblock" type="button">Code Block</button>
 <button class="tool-btn" data-action="mermaid" type="button">Mermaid</button>
-</div>
+<select class="tool-select" id="insertMoreSelect">
+<option value="">More</option>
+<option value="image">Image URL</option>
+<option value="toc">TOC</option>
+<option value="code">Inline Code</option>
+<option value="ruleBreak">Page Break</option>
+</select>
 </div><div class="ribbon-group-label">Insert</div></div>
-<div class="ribbon-group"><div class="ribbon-group-body">
-<button class="tool-btn large" data-action="code" type="button"><span class="icon">&lt;/&gt;</span><span>Inline Code</span></button>
-<button class="tool-btn large" data-action="ruleBreak" type="button"><span class="icon">—</span><span>Page Break</span></button>
-</div><div class="ribbon-group-label">Objects</div></div>
 </div>
 </div>
 <div class="ribbon-panel" data-panel="view">
 <div class="ribbon-row">
 <div class="ribbon-group"><div class="ribbon-group-body">
-<button class="tool-btn large" id="themeRibbonBtn" type="button"><span class="icon">☾</span><span>Dark Mode</span></button>
-<button class="tool-btn large" id="fullscreenRibbonBtn" type="button"><span class="icon">⛶</span><span>Fullscreen</span></button>
-<button class="tool-btn large" id="outlineToggleBtn" type="button"><span class="icon">≡</span><span>Outline On</span></button>
-<button class="tool-btn large" id="editorToggleBtn" type="button"><span class="icon">✎</span><span>Editor On</span></button>
-<button class="tool-btn large" id="previewToggleBtn" type="button"><span class="icon">👁</span><span>Preview On</span></button>
+<button class="tool-btn" id="themeRibbonBtn" type="button"><span class="icon">☾</span><span>Dark Mode</span></button>
+<button class="tool-btn" id="fullscreenRibbonBtn" type="button"><span class="icon">⛶</span><span>Fullscreen</span></button>
+<button class="tool-btn" id="outlineToggleBtn" type="button"><span class="icon">≡</span><span>Outline On</span></button>
+<button class="tool-btn" id="editorToggleBtn" type="button"><span class="icon">✎</span><span>Editor On</span></button>
+<button class="tool-btn" id="previewToggleBtn" type="button"><span class="icon">👁</span><span>Preview On</span></button>
 </div><div class="ribbon-group-label">Display</div></div>
 <div class="ribbon-group"><div class="ribbon-group-body">
-<div class="ribbon-col">
-<button class="tool-btn" id="panePreset40" type="button">Editor 40%</button>
-<button class="tool-btn" id="panePreset50" type="button">Editor 50%</button>
-</div>
-<div class="ribbon-col">
-<button class="tool-btn" id="panePreset60" type="button">Editor 60%</button>
-<button class="tool-btn" id="panePreset70" type="button">Editor 70%</button>
-</div>
+<button class="tool-btn" id="panePreset40" type="button">40%</button>
+<button class="tool-btn" id="panePreset50" type="button">50%</button>
+<button class="tool-btn" id="panePreset60" type="button">60%</button>
+<button class="tool-btn" id="panePreset70" type="button">70%</button>
 </div><div class="ribbon-group-label">Pane Width</div></div>
 <div class="ribbon-group"><div class="ribbon-group-body">
-<div class="ribbon-col">
 <button class="tool-btn" id="zoomOutBtn" type="button">Zoom Out</button>
 <button class="tool-btn" id="zoom100Btn" type="button">100%</button>
-</div>
-<div class="ribbon-col">
 <button class="tool-btn" id="zoomInBtn" type="button">Zoom In</button>
 <button class="tool-btn zoom-badge" id="zoomBadge" type="button">100%</button>
-</div>
 </div><div class="ribbon-group-label">Zoom</div></div>
 <div class="ribbon-group"><div class="ribbon-group-body">
-<div class="ribbon-col">
 <button class="tool-btn" id="outlineExpandBtn" type="button">Expand All</button>
 <button class="tool-btn" id="outlineCollapseBtn" type="button">Collapse All</button>
-</div>
-<div class="ribbon-col">
 <button class="tool-btn" id="densityToggleBtn" type="button">Compact UI</button>
 <button class="tool-btn" id="resetLayoutBtn" type="button">Reset Layout</button>
-</div>
 </div><div class="ribbon-group-label">Layout</div></div>
 </div>
 </div>
 <div class="ribbon-panel" data-panel="export">
 <div class="ribbon-row">
 <div class="ribbon-group"><div class="ribbon-group-body">
-<button class="tool-btn large" id="copyMdRibbonBtn" type="button"><span class="icon">⧉</span><span>Copy MD</span></button>
-<button class="tool-btn large" id="copyRibbonBtn" type="button"><span class="icon">⧉</span><span>Copy HTML</span></button>
+<button class="tool-btn" id="copyMdRibbonBtn" type="button"><span class="icon">⧉</span><span>Copy MD</span></button>
+<button class="tool-btn" id="copyRibbonBtn" type="button"><span class="icon">⧉</span><span>Copy HTML</span></button>
 </div><div class="ribbon-group-label">Clipboard</div></div>
 <div class="ribbon-group"><div class="ribbon-group-body">
-<button class="tool-btn large" id="exportRibbonBtn" type="button"><span class="icon">⇩</span><span>Export Preset</span></button>
-<button class="tool-btn large" id="exportHtmlRibbonBtn" type="button"><span class="icon">⇩</span><span>Export Web HTML</span></button>
-<button class="tool-btn large" id="printRibbonBtn" type="button"><span class="icon">🖨</span><span>Print</span></button>
+<button class="tool-btn" id="exportRibbonBtn" type="button"><span class="icon">⇩</span><span>Export Preset</span></button>
+<button class="tool-btn" id="exportHtmlRibbonBtn" type="button"><span class="icon">⇩</span><span>Web HTML</span></button>
+<button class="tool-btn" id="printRibbonBtn" type="button"><span class="icon">🖨</span><span>Print</span></button>
 </div><div class="ribbon-group-label">Export</div></div>
 </div>
 </div>
@@ -412,7 +392,7 @@
 </section>
 </main>
 <footer class="statusbar">
-<div class="status-group"><span>Mike Markdown Editor (MME) v7.5</span><span id="wordCount">Words: 0</span><span id="charCount">Characters: 0</span><span id="lineCount">Lines: 1</span></div>
+<div class="status-group"><span>Mike Markdown Editor (MME) v7.6</span><span id="wordCount">Words: 0</span><span id="charCount">Characters: 0</span><span id="lineCount">Lines: 1</span></div>
 <div class="status-group"><span id="saveState">Saved locally</span><span id="cursorState">Ln 1, Col 1</span></div>
 </footer>
 </div>
@@ -427,7 +407,7 @@
 <button class="quick-btn chooser-close" id="newDocChooserCloseBtn" type="button" aria-label="Close new document chooser">✕</button>
 </div>
 <div class="chooser-body">
-<button class="chooser-option" id="chooserDemoDocBtn" type="button"><span class="chooser-option-title">Demo Document</span><span class="chooser-option-copy">Load the full v7.5 showcase template for testing preview, export, print, and layout.</span></button>
+<button class="chooser-option" id="chooserDemoDocBtn" type="button"><span class="chooser-option-title">Demo Document</span><span class="chooser-option-copy">Load the full v7.6 showcase template for testing preview, export, print, and layout.</span></button>
 <button class="chooser-option" id="chooserBlankDocBtn" type="button"><span class="chooser-option-title">Blank Document</span><span class="chooser-option-copy">Start with a clean empty document and no sample content.</span></button>
 </div>
 </div>
@@ -448,7 +428,7 @@
 </div>
 </div>
 <aside aria-hidden="true" class="side-drawer" id="sideDrawer">
-<div class="drawer-header"><div class="drawer-title">Mike Markdown Editor (MME) v7.5</div><button class="drawer-btn drawer-close" id="drawerCloseBtn" type="button">✕</button></div>
+<div class="drawer-header"><div class="drawer-title">Mike Markdown Editor (MME) v7.6</div><button class="drawer-btn drawer-close" id="drawerCloseBtn" type="button">✕</button></div>
 <div class="drawer-body">
 <div class="drawer-section"><div class="drawer-section-title">File</div><div class="drawer-section-body">
 <button class="drawer-btn primary" id="drawerNewBtn" type="button">New</button>
@@ -566,7 +546,7 @@
 
     mermaid.initialize({ startOnLoad: false, securityLevel: "loose", theme: "default" });
 
-    const DEMO_DOC = `# Mike Markdown Editor v7.5 Demo
+    const DEMO_DOC = `# Mike Markdown Editor v7.6 Demo
 
 A document designed to showcase export, print, preview, and layout behaviour.
 
@@ -625,7 +605,7 @@ A document designed to showcase export, print, preview, and layout behaviour.
 
 [Visit OpenAI](https://openai.com)
 
-![Placeholder Image](https://via.placeholder.com/480x180.png?text=Mike+Editor+v7.5)
+![Placeholder Image](https://via.placeholder.com/480x180.png?text=Mike+Editor+v7.6)
 
 ---
 
@@ -636,7 +616,7 @@ A document designed to showcase export, print, preview, and layout behaviour.
 | Markdown | Yes | Core functionality |
 | Mermaid | Yes | Diagram rendering |
 | Print Layout | Yes | A4 oriented |
-| Export Presets | Yes | v7.5 focus |
+| Export Presets | Yes | v7.6 focus |
 
 ---
 
@@ -695,7 +675,7 @@ Use this section to test:
 
 ---
 
-## 9. Export Modes in v7.5
+## 9. Export Modes in v7.6
 
 This document is designed to test:
 
@@ -759,6 +739,8 @@ Start writing here.
       h2: () => applyHeading(2),
       h3: () => applyHeading(3),
       h4: () => applyHeading(4),
+      h5: () => applyHeading(5),
+      h6: () => applyHeading(6),
       quote: () => applyLinePrefix("> "),
       bold: () => applyInlineWrap("**", "**", "bold text"),
       italic: () => applyInlineWrap("*", "*", "italic text"),
@@ -1608,7 +1590,7 @@ Start writing here.
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Exported from Mike Markdown Editor (MME) v7.5</title>
+<title>Exported from Mike Markdown Editor (MME) v7.6</title>
 <style>
 :root{color-scheme:light}
 body{font-family:Segoe UI,Arial,sans-serif;line-height:1.7;color:#1f2732}
@@ -1792,6 +1774,19 @@ ${bodyHtml}
     document.querySelectorAll("[data-action]").forEach((btn) => btn.onclick = () => CommandRegistry[btn.dataset.action]?.());
     document.querySelectorAll("[data-drawer-action]").forEach((btn) => btn.onclick = () => { CommandRegistry[btn.dataset.drawerAction]?.(); closeDrawer(); });
     ribbonTabs.forEach((tab) => tab.onclick = () => setRibbonTab(tab.dataset.tab));
+
+    const headingSelect = document.getElementById("headingSelect");
+    if (headingSelect) headingSelect.onchange = () => {
+      const action = headingSelect.value;
+      if (action && CommandRegistry[action]) CommandRegistry[action]();
+      headingSelect.value = "";
+    };
+    const insertMoreSelect = document.getElementById("insertMoreSelect");
+    if (insertMoreSelect) insertMoreSelect.onchange = () => {
+      const action = insertMoreSelect.value;
+      if (action && CommandRegistry[action]) CommandRegistry[action]();
+      insertMoreSelect.value = "";
+    };
 
     document.getElementById("newDocBtn").onclick = newDocument;
     document.getElementById("exportMdBtn").onclick = chooseExportPreset;
