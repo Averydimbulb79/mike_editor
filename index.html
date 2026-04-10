@@ -235,11 +235,6 @@
       #printPage pre { white-space: pre-wrap; word-break: break-word; }
     }
   </style>
-
-<meta name="theme-color" content="#2563eb"/>
-<meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
-<meta name="apple-mobile-web-app-title" content="Mike Markdown Editor"/>
 <meta content="A document-first Markdown editor designed for clean writing, structured layout, and reliable export. Includes Mermaid diagram support." name="description"/></head>
 <body data-theme="light" data-density="comfortable">
 <div class="app">
@@ -261,7 +256,6 @@
 <button class="quick-btn" id="printBtn" type="button">Print</button>
 <button class="quick-btn" id="themeToggleBtn" type="button">Dark Mode</button>
 <button class="quick-btn" id="fullscreenBtn" type="button">Fullscreen</button>
-<button class="quick-btn" id="installBtn" type="button" hidden>Install App</button>
 </div>
 <button aria-expanded="false" aria-label="Open menu" class="menu-btn" id="menuToggleBtn" type="button">☰</button>
 <input accept=".md,.markdown,.txt" id="importFile" type="file"/>
@@ -447,7 +441,6 @@
 <div class="drawer-section"><div class="drawer-section-title">View</div><div class="drawer-section-body">
 <button class="drawer-btn" id="drawerThemeBtn" type="button">Dark Mode</button>
 <button class="drawer-btn" id="drawerFullscreenBtn" type="button">Fullscreen</button>
-<button class="drawer-btn" id="drawerInstallBtn" type="button" hidden>Install App</button>
 </div></div>
 </div>
 </aside>
@@ -468,7 +461,7 @@
 
     const HISTORY_LIMIT = 200;
 
-    const UIState = { activeRibbonTab: "home", ribbonCollapsed: false, drawerOpen: false, fullscreen: false, paneWidth: 50, wrapEnabled: true, outlineOpen: true, theme: "light", mobilePreview: false, editorVisible: true, previewVisible: true, zoom: 1, density: "comfortable", outlineCollapsed: {}, pendingInstallPrompt: null, installed: false };
+    const UIState = { activeRibbonTab: "home", ribbonCollapsed: false, drawerOpen: false, fullscreen: false, paneWidth: 50, wrapEnabled: true, outlineOpen: true, theme: "light", mobilePreview: false, editorVisible: true, previewVisible: true, zoom: 1, density: "comfortable", outlineCollapsed: {} };
 
     const editor = document.getElementById("editor");
     const printPage = document.getElementById("printPage");
@@ -495,8 +488,6 @@
     const fullscreenBtn = document.getElementById("fullscreenBtn");
     const fullscreenRibbonBtn = document.getElementById("fullscreenRibbonBtn");
     const drawerFullscreenBtn = document.getElementById("drawerFullscreenBtn");
-    const installBtn = document.getElementById("installBtn");
-    const drawerInstallBtn = document.getElementById("drawerInstallBtn");
     const menuToggleBtn = document.getElementById("menuToggleBtn");
     const drawerBackdrop = document.getElementById("drawerBackdrop");
     const newDocBackdrop = document.getElementById("newDocBackdrop");
@@ -552,98 +543,6 @@
     const exportHtmlRibbonBtn = document.getElementById("exportHtmlRibbonBtn");
     const exportPrintHtmlRibbonBtn = document.getElementById("exportPrintHtmlRibbonBtn");
     const exportMinimalMdRibbonBtn = document.getElementById("exportMinimalMdRibbonBtn");
-
-
-    function svgIconDataUrl(label = "MME", bg1 = "#3b82f6", bg2 = "#1d4ed8") {
-      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="${bg1}"/><stop offset="100%" stop-color="${bg2}"/></linearGradient></defs><rect width="512" height="512" rx="120" fill="url(#g)"/><text x="50%" y="54%" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="190" font-weight="800" fill="white">${label}</text></svg>`;
-      return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
-    }
-
-    function setupPwaManifest() {
-      const manifest = {
-        name: "Mike Markdown Editor",
-        short_name: "MME",
-        description: "Document-first Markdown editor with Mermaid support.",
-        start_url: "./",
-        scope: "./",
-        display: "standalone",
-        background_color: "#eef1f5",
-        theme_color: "#2563eb",
-        icons: [
-          { src: svgIconDataUrl("M"), sizes: "512x512", type: "image/svg+xml", purpose: "any" },
-          { src: svgIconDataUrl("M"), sizes: "512x512", type: "image/svg+xml", purpose: "maskable" }
-        ]
-      };
-      const blob = new Blob([JSON.stringify(manifest)], { type: "application/manifest+json" });
-      const url = URL.createObjectURL(blob);
-      let link = document.querySelector('link[rel="manifest"]');
-      if (!link) {
-        link = document.createElement("link");
-        link.rel = "manifest";
-        document.head.appendChild(link);
-      }
-      link.href = url;
-    }
-
-    function updateInstallButtons() {
-      const canInstall = !!UIState.pendingInstallPrompt && !UIState.installed;
-      if (installBtn) installBtn.hidden = !canInstall;
-      if (drawerInstallBtn) drawerInstallBtn.hidden = !canInstall;
-    }
-
-    async function promptInstall() {
-      const promptEvent = UIState.pendingInstallPrompt;
-      if (!promptEvent) {
-        saveState.textContent = window.isSecureContext ? "Install not available yet" : "Use HTTPS or localhost for install";
-        setTimeout(() => saveState.textContent = "Saved locally", 1600);
-        return;
-      }
-      promptEvent.prompt();
-      try {
-        const choice = await promptEvent.userChoice;
-        saveState.textContent = choice.outcome === "accepted" ? "Install started" : "Install dismissed";
-      } catch {
-        saveState.textContent = "Install prompt unavailable";
-      }
-      UIState.pendingInstallPrompt = null;
-      updateInstallButtons();
-      setTimeout(() => saveState.textContent = "Saved locally", 1600);
-    }
-
-    function registerPwa() {
-      setupPwaManifest();
-      UIState.installed = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-      updateInstallButtons();
-
-      window.addEventListener('beforeinstallprompt', (event) => {
-        event.preventDefault();
-        UIState.pendingInstallPrompt = event;
-        updateInstallButtons();
-        saveState.textContent = 'App can be installed';
-        setTimeout(() => saveState.textContent = 'Saved locally', 1800);
-      });
-
-      window.addEventListener('appinstalled', () => {
-        UIState.installed = true;
-        UIState.pendingInstallPrompt = null;
-        updateInstallButtons();
-        saveState.textContent = 'App installed';
-        setTimeout(() => saveState.textContent = 'Saved locally', 1800);
-      });
-
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', async () => {
-          const isHttp = location.protocol === 'http:' || location.protocol === 'https:';
-          const isLocalhost = ['localhost', '127.0.0.1'].includes(location.hostname);
-          if (!isHttp && !isLocalhost) return;
-          try {
-            await navigator.serviceWorker.register('./mme-pwa-sw.js');
-          } catch (err) {
-            console.warn('Service worker registration failed:', err);
-          }
-        });
-      }
-    }
 
     mermaid.initialize({ startOnLoad: false, securityLevel: "loose", theme: "default" });
 
@@ -1910,10 +1809,8 @@ ${bodyHtml}
     themeRibbonBtn.onclick = toggleTheme;
     if (drawerThemeBtn) drawerThemeBtn.onclick = async () => { closeDrawer(); await toggleTheme(); };
     fullscreenBtn.onclick = toggleFullscreen;
-    if (installBtn) installBtn.onclick = promptInstall;
     fullscreenRibbonBtn.onclick = toggleFullscreen;
     if (drawerFullscreenBtn) drawerFullscreenBtn.onclick = async () => { closeDrawer(); await toggleFullscreen(); };
-    if (drawerInstallBtn) drawerInstallBtn.onclick = async () => { closeDrawer(); await promptInstall(); };
     outlineToggleBtn.onclick = () => setOutlineOpen(!UIState.outlineOpen);
     editorToggleBtn.onclick = () => setEditorVisible(!UIState.editorVisible);
     previewToggleBtn.onclick = () => setPreviewVisible(!UIState.previewVisible);
@@ -2047,7 +1944,6 @@ ${bodyHtml}
       applyLayout();
     };
 
-    registerPwa();
     load();
 
   </script>
