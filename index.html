@@ -605,7 +605,7 @@ A document designed to showcase export, print, preview, and layout behaviour.
 
 [Visit OpenAI](https://openai.com)
 
-![Placeholder Image](https://via.placeholder.com/480x180.png?text=Mike+Editor+v7.6)
+![Mike Editor v7.6 Demo Image](data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0ODAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgNDgwIDE4MCI+PHJlY3Qgd2lkdGg9IjQ4MCIgaGVpZ2h0PSIxODAiIHJ4PSIxOCIgZmlsbD0iI2VlZjRmZiIvPjxyZWN0IHg9IjE4IiB5PSIxOCIgd2lkdGg9IjQ0NCIgaGVpZ2h0PSIxNDQiIHJ4PSIxNCIgZmlsbD0iI2ZmZmZmZiIgc3Ryb2tlPSIjYzdkN2YyIiBzdHJva2Utd2lkdGg9IjIiLz48dGV4dCB4PSIyNDAiIHk9Ijc4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iU2Vnb2UgVUksIEFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjI2IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMjU2M2ViIj5NaWtlIEVkaXRvciB2Ny42PC90ZXh0Pjx0ZXh0IHg9IjI0MCIgeT0iMTEyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iU2Vnb2UgVUksIEFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0IiBmaWxsPSIjNjk3NTg2Ij5JbmxpbmUgZGVtbyBpbWFnZSwgbm8gZXh0ZXJuYWwgcGxhY2Vob2xkZXIgc2VydmljZTwvdGV4dD48L3N2Zz4=)
 
 ---
 
@@ -1480,6 +1480,15 @@ Start writing here.
       return false;
     }
 
+    function looksLikeMarkdownTable(lines) {
+      const meaningful = lines.map((line) => line.trim()).filter(Boolean);
+      if (meaningful.length < 2) return false;
+      const pipeLines = meaningful.filter((line) => line.includes("|"));
+      if (pipeLines.length < 2) return false;
+      const dividerPattern = /^\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?\s*$/;
+      return meaningful.some((line) => dividerPattern.test(line));
+    }
+
     function normalizePastedText(text) {
       let normalized = text.replace(/\r\n?/g, "\n");
       if (/^https?:\/\/\S+$/i.test(normalized.trim())) {
@@ -1488,10 +1497,15 @@ Start writing here.
       }
 
       const lines = normalized.split("\n");
+
+      // Preserve pasted Markdown tables exactly. Earlier smart paste logic treated
+      // every plain multi-line block as a bullet list, so table rows became "- | ...".
+      if (looksLikeMarkdownTable(lines)) return normalized;
+
       const shouldBulletize = lines.length > 1 && lines.every((line) => {
         const trimmed = line.trim();
         if (!trimmed) return true;
-        return !/^([\-+*]|\d+\.|>)/.test(trimmed) && trimmed.length > 0;
+        return !/^([\-+*]|\d+\.|>|\|)/.test(trimmed) && trimmed.length > 0;
       });
       if (shouldBulletize) {
         normalized = lines.map((line) => line.trim() ? `- ${line.trim()}` : "").join("\n");
@@ -1747,7 +1761,17 @@ ${bodyHtml}
 
     function load() {
       const savedDoc = localStorage.getItem(STORAGE_KEY);
-      editor.value = (savedDoc && savedDoc.trim()) ? savedDoc : defaultDoc;
+      let initialDoc = (savedDoc && savedDoc.trim()) ? savedDoc : defaultDoc;
+
+      // If the browser is holding onto an older bundled demo, upgrade the visible
+      // sample text instead of making the user clear localStorage manually.
+      const looksLikeOldBundledDemo = /Mike Markdown Editor v7\.5 Demo/.test(initialDoc) || /MME v7\.5/.test(initialDoc);
+      if (looksLikeOldBundledDemo) {
+        initialDoc = initialDoc.replace(/v7\.5/g, "v7.6");
+        localStorage.setItem(STORAGE_KEY, initialDoc);
+      }
+
+      editor.value = initialDoc;
       setWrap(localStorage.getItem(WRAP_KEY) !== "off");
       setTheme(localStorage.getItem(THEME_KEY) || "light");
       setRibbonTab(localStorage.getItem(TAB_KEY) || "home");
