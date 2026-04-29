@@ -3,7 +3,7 @@
 Multi-Ribbon Markdown Editor with Mermaid Support
 
 Live Demo  
-https://averydimbulb79.github.io/mike_editor/index.html
+https://averydimbulb79.github.io/mike_markdown_editor/index.html
 
 ---
 
